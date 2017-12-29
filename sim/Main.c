@@ -23,6 +23,13 @@ int main(int argc, char* argv[])
 		return FAIL;
 	}
 
+	int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
+	if (!parse_memin_file(memory_in_path, memory_image_input))
+	{
+		return FAIL;
+	}
+
+
 	return SUCCESS;
 }
 

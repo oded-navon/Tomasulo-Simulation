@@ -21,3 +21,4 @@ struct config_args {
 };
 
 bool parse_config_file(char* config_file_path, struct config_args* output_config_args);
+bool parse_memin_file(char* memin_file_path, int* output_memory_image);

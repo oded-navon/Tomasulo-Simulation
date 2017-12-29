@@ -4,23 +4,34 @@
 
 #define MAX_STR_LEN (100)
 
-bool parse_file_line(char* line, int* output_config_value, char** output_config_arg);
+bool parse_config_file_line(char* line, int* output_config_value, char* output_config_arg);
 bool insert_arg_to_struct(struct config_args* output_config_args, char* arg, int arg_val);
 
-/*enum config_args_enum {
-	add_nr_units,
-	mul_nr_units,
-	div_nr_units,
-	add_nr_reservation,
-	mul_nr_reservation,
-	div_nr_reservation,
-	add_delay,
-	mul_delay,
-	div_delay,
-	mem_delay,
-	mem_nr_load_buffers,
-	mem_nr_store_buffers
-};*/
+bool parse_memin_file(char* memin_file_path, int* output_memory_image)
+{
+	bool return_value = true;
+	FILE* memin_file = fopen(memin_file_path, "r");
+	if (memin_file == NULL)
+	{
+		return false;
+	}
+
+	char* line = (char*)malloc(MAX_STR_LEN);
+	int cnt = 0;
+	while (fgets(line, MAX_STR_LEN, memin_file) != NULL)
+	{
+		int number = (int)strtol(line, NULL, 16);
+		output_memory_image[cnt] = number;
+
+		memset(line, 0, MAX_STR_LEN);
+		cnt++;
+	}
+
+cleanup:
+	fclose(memin_file);
+	free(line);
+	return return_value;
+}
 
 bool parse_config_file(char* config_file_path, struct config_args* output_config_args)
 {
@@ -36,7 +47,7 @@ bool parse_config_file(char* config_file_path, struct config_args* output_config
 	{
 		int output_config_value;
 		char output_config_arg[MAX_STR_LEN];
-		if (!parse_file_line(line, &output_config_value, output_config_arg))
+		if (!parse_config_file_line(line, &output_config_value, output_config_arg))
 		{
 			return_value = false;
 			goto cleanup;
@@ -57,7 +68,7 @@ cleanup:
 	return return_value;
 }
 
-bool parse_file_line(char* line, int* output_config_value, char* output_config_arg)
+bool parse_config_file_line(char* line, int* output_config_value, char* output_config_arg)
 {
 	char* token = strtok(line, " = ");
 	if (token == NULL)
@@ -75,11 +86,6 @@ bool parse_file_line(char* line, int* output_config_value, char* output_config_a
 
 	return true;
 }
-
-/*bool get_line(FILE* file, char** output_line)
-{
-	return (fscanf(file, "%[^\n]", *output_line) > 0);
-}*/
 
 bool insert_arg_to_struct(struct config_args* output_config_args, char* arg, int arg_val)
 {
