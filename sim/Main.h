@@ -9,3 +9,5 @@
 #define SUCCESS (0)
 #define FAIL (-1)
 #define MEMORY_IMAGE_INPUT_SIZE (4096)
+#define MAX_INST_NUM (1024)
+#define MAX_CDB_NUM (1024)

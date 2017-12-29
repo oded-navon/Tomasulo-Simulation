@@ -1,4 +1,3 @@
-﻿  ArgParser.c
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(30): warning C4102: 'cleanup': unreferenced label
+﻿  Main.c
   sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.exe
   sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.pdb (Full PDB)
