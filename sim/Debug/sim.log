@@ -1,0 +1,6 @@
+﻿  ArgParser.c
+c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(39): warning C4047: 'function': 'char **' differs in levels of indirection from 'char [100]'
+c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(39): warning C4024: 'parse_file_line': different types for formal and actual parameter 3
+c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(61): warning C4028: formal parameter 3 different from declaration
+  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.exe
+  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.pdb (Full PDB)
