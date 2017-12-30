@@ -1,36 +1,34 @@
+#include "Utils.h"
 
 
 
-#define MAX 16
-
-int intArray[MAX];
-int front = 0;
-int last = -1;
-int itemCount = 0;
-
-int peek() {
-	return intArray[front];
+inst peek(iq iq_arr) {
+	return iq_arr.inst_arr[iq_arr.front];
 }
 
 
-void enqueue(int data) {
+void enqueue(iq iq_arr,inst data) {
 
-	if (last == MAX - 1) {
-		last = -1;
+	if (iq_arr.last == MAX_ITEMS - 1) {
+		iq_arr.last = -1;
 	}
 
-	intArray[++last] = data;
-	itemCount++;
+	iq_arr.inst_arr[++iq_arr.last] = data;
+	iq_arr.num_items++;
 
 }
+bool is_queue_full(iq iq_arr)
+{
+	return iq_arr.num_items == MAX_ITEMS;
+}
 
-int dequeue() {
-	int data = intArray[front++];
+inst dequeue(iq iq_arr) {
+	inst data = iq_arr.inst_arr[iq_arr.front++];
 
-	if (front == MAX) {
-		front = 0;
+	if (iq_arr.front == MAX_ITEMS) {
+		iq_arr.front = 0;
 	}
 
-	itemCount--;
+	iq_arr.num_items--;
 	return data;
 }

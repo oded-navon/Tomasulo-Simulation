@@ -1,19 +1,22 @@
 #include "Main.h"
-
+#include "Utils.h"
 
 config_args* config_args_read;
 inst** instructions;
-inst* iq[16]; //our instruction queue
-int last_unoccupied_index_in_iq = 0;
+iq iq_arr = {
+	.front = 0,
+	.last = -1,
+	.num_items = 0
+}; //our instruction queue
+
+
 inst* instructions[MAX_INST_NUM];
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 CDB** cdb;
 unsigned int cycles = 0;
-int last_unissued_inst_in_iq = 0;
-int number_of_instructions_in_iq = 0;
-int current_inst_in_instructions = 0;
 int num_of_inst;
 int num_of_cdb;
+int current_inst_in_instructions = 0;
 RS RAT[16]; //mapping between register to reservation station
 RS rs_add[64];
 RS rs_mul[64];
@@ -35,11 +38,9 @@ void cleanup(cleanup_type clean_type);
 
 void fetch_instruction()
 {
-	if (number_of_instructions_in_iq <= 15 && current_inst_in_instructions < num_of_inst)
+	if (is_queue_full(iq_arr) && (current_inst_in_instructions < num_of_inst))
 	{
-		iq[last_unoccupied_index_in_iq] = instructions[current_inst_in_instructions];
-		last_unoccupied_index_in_iq = (last_unoccupied_index_in_iq + 1) % 16;
-		number_of_instructions_in_iq++; //TODO notice we take down the number of instructions once we issued an instruction
+		enqueue(iq_arr,instructions[current_inst_in_instructions]);
 		current_inst_in_instructions++;
 	}
 }

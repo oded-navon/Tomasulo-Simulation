@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "Utils.h"
 
-#define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
 
 typedef enum {
@@ -29,15 +29,7 @@ typedef struct {
 	int	mem_nr_store_buffers;
 }config_args;
 
-typedef struct {
-	int inst_code;
-	int pc;
-	char tag[TAG_LEN];
-	int cycle_issued;
-	int cycle_ex_start;
-	int cycle_ex_end;
-	int write_cdb;
-}inst;
+
 
 
 
