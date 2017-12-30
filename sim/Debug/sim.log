@@ -1,7 +1,0 @@
-﻿  Main.c
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(63): warning C4047: 'function': 'void **' differs in levels of indirection from 'int (*)[4096]'
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(63): warning C4022: 'parse_file': pointer mismatch for actual parameter 3
-  ArgParser.c
-  Generating Code...
-  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.exe
-  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.pdb (Full PDB)
