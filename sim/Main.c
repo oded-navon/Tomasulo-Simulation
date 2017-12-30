@@ -19,9 +19,9 @@ RS rs_add[64];
 RS rs_mul[64];
 RS rs_div[64];
 
-calc_unit add_units[64]; //change t ostruct, if timer -1 we can runover, TODO look into starvation
-bool div_units[64];
-bool mul_units[64];
+calc_unit add_units[64]; //change to struct, if timer -1 we can runover, TODO look into starvation
+calc_unit div_units[64];
+calc_unit mul_units[64];
 
 
 typedef enum {
@@ -35,7 +35,7 @@ void cleanup(cleanup_type clean_type);
 
 void fetch_instruction()
 {
-	if (number_of_instructions_in_iq <= 15)
+	if (number_of_instructions_in_iq <= 15 && current_inst_in_instructions < num_of_inst)
 	{
 		iq[last_unoccupied_index_in_iq] = instructions[current_inst_in_instructions];
 		last_unoccupied_index_in_iq = (last_unoccupied_index_in_iq + 1) % 16;
@@ -144,6 +144,10 @@ int issue_instruction()
 	//inst* inst = take_next_instruction_from_IQ();
 	inst* instr = iq[last_unissued_inst_in_iq];
 	RS* rs = get_free_reservation_station(instr.inst_code);
+	if (rs == NULL)	//meaning there are no free RS's
+	{
+		return 0;
+	}
 
 	put_inst_in_RS();
 
