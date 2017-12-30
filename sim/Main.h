@@ -11,6 +11,7 @@
 #define MEMORY_IMAGE_INPUT_SIZE (4096)
 #define MAX_INST_NUM (4096)
 #define MAX_CDB_NUM (4096)
-
+#define MAX_CONFIG_SIZE (64)
+#define NO_RS_AVAILABLE (MAX_CONFIG_SIZE*2)
 
 int parse_args(char* argv[]);

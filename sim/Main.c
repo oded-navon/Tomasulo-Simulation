@@ -18,13 +18,13 @@ int num_of_inst;
 int num_of_cdb;
 int current_inst_in_instructions = 0;
 RS RAT[16]; //mapping between register to reservation station
-RS rs_add[64];
-RS rs_mul[64];
-RS rs_div[64];
+RS rs_add[MAX_CONFIG_SIZE];
+RS rs_mul[MAX_CONFIG_SIZE];
+RS rs_div[MAX_CONFIG_SIZE];
 
-calc_unit add_units[64]; //change to struct, if timer -1 we can runover, TODO look into starvation
-calc_unit div_units[64];
-calc_unit mul_units[64];
+calc_unit add_units[MAX_CONFIG_SIZE]; //change to struct, if timer -1 we can runover, TODO look into starvation
+calc_unit div_units[MAX_CONFIG_SIZE];
+calc_unit mul_units[MAX_CONFIG_SIZE];
 
 
 typedef enum {
@@ -83,37 +83,51 @@ int main(int argc, char* argv[])
 	return return_value;
 }
 
-inst* take_next_instruction_from_IQ()
+
+int get_free_reservation_station_index(int opcode)
 {
 	/*will return an RS from the correct kind for specified instruction
 	return:
 	null - meaning there's no available RS in this cycle, meaning we won't issue anything in the cycle
 	otherwise - available RS*/
-	inst* inst = iq[last_unissued_inst_in_iq];
-	last_unissued_inst_in_iq++;
-	
-}
-
-RS* get_free_reservation_station(inst* inst)
-{
-	/*will return an RS from the correct kind for specified instruction
-	return:
-	null - meaning there's no available RS in this cycle, meaning we won't issue anything in the cycle
-	otherwise - available RS*/
-
-
-}
-
-inst** determine_where_inputs_come_from(inst inst)
-{
-	/*will determine wether the inputs for the current instruction are already ready, or are they gonna be produced by some of the instructions that haven't yet broadcasted their results
-	return value:
-	empty array - means that the inputs are ready
-	otherwise - all instructions we must wait for them to be completed*/
-	inst** res = malloc(sizeof(inst)*MAX_INST_NUM);
+	int res;
+	switch (opcode)
+	{
+		case 0:
+		case 1:
+			return NULL;
+		case 2:
+		case 3:
+			res = get_free_reservation_station_index(rs_add, config_args_read->add_nr_reservation);
+			break;
+		case 4:
+			res = get_free_reservation_station_index(rs_mul, config_args_read->mul_nr_reservation);
+			break;
+		case 5:
+			res = get_free_reservation_station_index(rs_div, config_args_read->div_nr_reservation);
+			break;
+	}
 
 	return res;
-}	  
+}
+
+int get_free_reservation_station_index(RS rses[], int num_rses)
+{
+	for (int i = 0; i < num_rses; i++)
+	{
+		if (!rses[i].occupied) return i;
+	}
+	return NO_RS_AVAILABLE;
+}
+//inst** determine_where_inputs_come_from(inst inst)
+//{
+//	/*will determine wether the inputs for the current instruction are already ready, or are they gonna be produced by some of the instructions that haven't yet broadcasted their results
+//	return value:
+//	empty array - means that the inputs are ready
+//	otherwise - all instructions we must wait for them to be completed*/
+//
+//	return res;
+//}	  
 
 int issue()
 {
@@ -122,20 +136,46 @@ int issue()
 	return res;
 }
 
-void put_inst_in_RS(RS* rs)
+void put_inst_in_RS(int rs_index,inst* instr,int type, int dst, int src0, int src1, char* src0_name, char* src1_name)
 {
-	rs = &rs_type[i];
-	rs->status = BUSY;
-	rs->instr = curr;
+	switch (type)
+	{
+	case 0:
+	case 1:
+		return NULL;
+	case 2:
+	case 3:
+		//res = get_free_reservation_station_index(rs_add, config_args_read->add_nr_reservation);
+		/*typedef struct {
+			int dst;
+			int src0;
+			int src1;
+			char rs_waiting0[RS_NAME_LEN];
+			char rs_waiting1[RS_NAME_LEN];
+			int action_type;
+			bool occupied;
+		}RS;*/
 
-	if (curr->src1)
-		rs->qj = dep_lookup(curr->src1);
+		break;
+	case 4:
+		res = get_free_reservation_station_index(rs_mul, config_args_read->mul_nr_reservation);
+		break;
+	case 5:
+		res = get_free_reservation_station_index(rs_div, config_args_read->div_nr_reservation);
+		break;
+	}
+	//rs = &rs_type[i];
+	//rs->status = BUSY;
+	//rs->instr = curr;
 
-	if (curr->src2)
-		rs->qk = dep_lookup(curr->src2);
+	//if (curr->src1)
+	//	rs->qj = dep_lookup(curr->src1);
 
-	curr->issue_time = cycles;
-	instr_proc++;
+	//if (curr->src2)
+	//	rs->qk = dep_lookup(curr->src2);
+
+	//curr->issue_time = cycles;
+	//instr_proc++;
 }
 
 int issue_instruction()
@@ -143,16 +183,17 @@ int issue_instruction()
 	/*return 1 if issued instruction successfully, else 0*/
 	
 	//inst* inst = take_next_instruction_from_IQ();
-	inst* instr = iq[last_unissued_inst_in_iq];
-	RS* rs = get_free_reservation_station(instr.inst_code);
-	if (rs == NULL)	//meaning there are no free RS's
+	inst* instr = peek(iq_arr);
+	int type = instr->inst_code;
+	int rs_index = get_free_reservation_station_index(type);
+	if (rs_index == NO_RS_AVAILABLE)	
 	{
 		return 0;
 	}
 
-	put_inst_in_RS();
+	put_inst_in_RS(rs_index,instr,type);
 
-	inst** inst_to_wait_for = determine_where_inputs_come_from(inst);
+	
 	//tag_dest_register_of_inst(inst);
 	//int i, rs_count;
 	//Instruction *curr;

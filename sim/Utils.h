@@ -13,6 +13,7 @@ typedef struct {
 	char rs_waiting0[RS_NAME_LEN];
 	char rs_waiting1[RS_NAME_LEN];
 	int action_type;
+	bool occupied;
 }RS;
 
 typedef struct {
