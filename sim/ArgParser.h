@@ -39,6 +39,8 @@ typedef struct {
 	int write_cdb;
 }inst;
 
+
+
 typedef struct {
 	int cycle;
 	int pc;

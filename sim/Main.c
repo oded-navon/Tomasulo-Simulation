@@ -1,21 +1,45 @@
 #include "Main.h"
 
+
 config_args* config_args_read;
 inst** instructions;
 inst* iq[16]; //our instruction queue
 int last_unoccupied_index_in_iq = 0;
+inst* instructions[MAX_INST_NUM];
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 CDB** cdb;
 unsigned int cycles = 0;
-int current_inst_in_iq = 0;
+int last_unissued_inst_in_iq = 0;
+int number_of_instructions_in_iq = 0;
 int current_inst_in_instructions = 0;
+int num_of_inst;
+int num_of_cdb;
+RS RAT[16]; //mapping between register to reservation station
+RS rs_add[64];
+RS rs_mul[64];
+RS rs_div[64];
+
+calc_unit add_units[64]; //change t ostruct, if timer -1 we can runover, TODO look into starvation
+bool div_units[64];
+bool mul_units[64];
+
+
+typedef enum {
+	cleanup_all,
+	cleanup_inst_and_config,
+	cleanup_config
+} cleanup_type;
+
+void cleanup(cleanup_type clean_type);
+
 
 void fetch_instruction()
 {
-	if (last_unoccupied_index_in_iq < 15)
+	if (number_of_instructions_in_iq <= 15)
 	{
 		iq[last_unoccupied_index_in_iq] = instructions[current_inst_in_instructions];
-		last_unoccupied_index_in_iq++;
+		last_unoccupied_index_in_iq = (last_unoccupied_index_in_iq + 1) % 16;
+		number_of_instructions_in_iq++; //TODO notice we take down the number of instructions once we issued an instruction
 		current_inst_in_instructions++;
 	}
 }
@@ -26,9 +50,14 @@ void fetch()
 	fetch_instruction();
 }
 
+
+
+
+
+
 int main(int argc, char* argv[])
 {
-
+	
 	int return_value = SUCCESS;
 	int ret_args = parse_args(argv);
 	if (ret_args == -1)
@@ -36,12 +65,12 @@ int main(int argc, char* argv[])
 		return FAIL;
 	}
 	//while (instr_proc < instr_count) {
-	while (current_inst_in_instructions <= total_num_of_inst) {
+	while (current_inst_in_instructions <= num_of_inst) {
 
 		cycles++;
 		fetch();
 
-		issue();
+		int number_of_instructions_issued = issue();
 
 		execute();
 
@@ -59,7 +88,9 @@ inst* take_next_instruction_from_IQ()
 	return:
 	null - meaning there's no available RS in this cycle, meaning we won't issue anything in the cycle
 	otherwise - available RS*/
-	if(num_of_inst)
+	inst* inst = iq[last_unissued_inst_in_iq];
+	last_unissued_inst_in_iq++;
+	
 }
 
 RS* get_free_reservation_station(inst* inst)
@@ -68,6 +99,8 @@ RS* get_free_reservation_station(inst* inst)
 	return:
 	null - meaning there's no available RS in this cycle, meaning we won't issue anything in the cycle
 	otherwise - available RS*/
+
+
 }
 
 inst** determine_where_inputs_come_from(inst inst)
@@ -79,19 +112,43 @@ inst** determine_where_inputs_come_from(inst inst)
 	inst** res = malloc(sizeof(inst)*MAX_INST_NUM);
 
 	return res;
-}
-void issue()
+}	  
+
+int issue()
 {
+	int res = issue_instruction();
+	if(res == 1) res += issue_instruction();
+	return res;
+}
+
+void put_inst_in_RS(RS* rs)
+{
+	rs = &rs_type[i];
+	rs->status = BUSY;
+	rs->instr = curr;
+
+	if (curr->src1)
+		rs->qj = dep_lookup(curr->src1);
+
+	if (curr->src2)
+		rs->qk = dep_lookup(curr->src2);
+
+	curr->issue_time = cycles;
+	instr_proc++;
+}
+
+int issue_instruction()
+{
+	/*return 1 if issued instruction successfully, else 0*/
 	
-	inst* inst = take_next_instruction_from_IQ();
-
-	inst** inst_to_wait_for = determine_where_inputs_come_from(inst);
-
-	RS* rs = get_free_reservation_station();
+	//inst* inst = take_next_instruction_from_IQ();
+	inst* instr = iq[last_unissued_inst_in_iq];
+	RS* rs = get_free_reservation_station(instr.inst_code);
 
 	put_inst_in_RS();
 
-	tag_dest_register_of_inst(inst);
+	inst** inst_to_wait_for = determine_where_inputs_come_from(inst);
+	//tag_dest_register_of_inst(inst);
 	//int i, rs_count;
 	//Instruction *curr;
 	//RS *rs_type, *rs;
@@ -158,31 +215,35 @@ int parse_args(char* argv[])
 	char* trace_cdb_path = argv[6];
 
 	int return_value = SUCCESS;
-	
+	cleanup_type cleanup_ret = cleanup_all;
+
 	config_args_read = malloc(sizeof(config_args));
 	if (config_args_read == NULL)
 	{
 		return_value = FAIL;
-		goto cleanup_config;
+		cleanup_ret = cleanup_config;
+		goto cleanup;
 	}
 
-	if (!parse_file(config_file_path, config_parse, &config_args_read))
+	if (!parse_file(config_file_path, config_parse, &config_args_read, NULL))
 	{
 		return_value = FAIL;
-		goto cleanup_config;
+		cleanup_ret = cleanup_config;
+		goto cleanup;
 	}
 
-	if (!parse_file(memory_in_path, memin_parse, &memory_image_input))
+	if (!parse_file(memory_in_path, memin_parse, &memory_image_input, NULL))
 	{
 		return_value = FAIL;
-		goto cleanup_config;
+		cleanup_ret = cleanup_config;
+		goto cleanup;
 	}
 
-	instructions = malloc(sizeof(inst)*MAX_INST_NUM);
 	if (instructions == NULL)
 	{
 		return_value = FAIL;
-		goto cleanup_inst;
+		cleanup_ret = cleanup_inst_and_config;
+		goto cleanup;
 	}
 	for (int i = 0; i < MAX_INST_NUM; i++)
 	{
@@ -190,21 +251,24 @@ int parse_args(char* argv[])
 		if (instructions[i] == NULL)
 		{
 			return_value = FAIL;
-			goto cleanup_all;
+			cleanup_ret = cleanup_inst_and_config;
+			goto cleanup;
 		}
 	}
 
-	if (!parse_file(trace_inst_path, inst_parse, instructions))
+	if (!parse_file(trace_inst_path, inst_parse, instructions, &num_of_inst))
 	{
 		return_value = FAIL;
-		goto cleanup_inst;
+		cleanup_ret = cleanup_inst_and_config;
+		goto cleanup;
 	}
 
 	cdb = malloc(sizeof(CDB)*MAX_CDB_NUM);
 	if (cdb == NULL)
 	{
 		return_value = FAIL;
-		goto cleanup_all;
+		cleanup_ret = cleanup_all;
+		goto cleanup;
 	}
 	for (int i = 0; i < MAX_CDB_NUM; i++)
 	{
@@ -212,32 +276,40 @@ int parse_args(char* argv[])
 		if (cdb[i] == NULL)
 		{
 			return_value = FAIL;
-			goto cleanup_all;
+			cleanup_ret = cleanup_all;
+			goto cleanup;
 		}
 	}
 
-	if (!parse_file(trace_cdb_path, cdb_parse, cdb))
+	if (!parse_file(trace_cdb_path, cdb_parse, cdb, &num_of_cdb))
 	{
 		return_value = FAIL;
-		goto cleanup_all;
+		cleanup_ret = cleanup_all;
+		goto cleanup;
 	}
 
-
-cleanup_all:
-	for (int i = 0; i < MAX_CDB_NUM; i++)
-	{
-		free(cdb[i]);
-	}
-	free(cdb);
-cleanup_inst:
-	for (int i = 0; i < MAX_INST_NUM; i++)
-	{
-		free(instructions[i]);
-	}
-	free(instructions);
-cleanup_config:
-	free(config_args_read);
+cleanup:
+	cleanup(cleanup_ret);
 
 	return return_value;
+}
 
+void cleanup(cleanup_type clean_type)
+{
+	switch (clean_type)
+	{
+		case cleanup_all:
+			for (int i = 0; i < MAX_CDB_NUM; i++)
+			{
+				free(cdb[i]);
+			}
+			free(cdb);
+		case cleanup_inst_and_config:
+			for (int i = 0; i < MAX_INST_NUM; i++)
+			{
+				free(instructions[i]);
+			}
+		case cleanup_config:
+			free(config_args_read);
+	}
 }
