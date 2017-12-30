@@ -15,7 +15,7 @@ int parse_int_number(char* int_number);
 int parse_hex_number(char* hex_number);
 
 
-bool parse_file(char* file_path, parse_type parsing_type, void** output_object)
+bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter)
 {
 	bool return_value = true;
 	FILE* file = fopen(file_path, "r");
@@ -59,6 +59,10 @@ bool parse_file(char* file_path, parse_type parsing_type, void** output_object)
 	}
 
 cleanup:
+	if (counter != NULL)
+	{
+		*counter = cnt;
+	}
 	fclose(file);
 	free(line);
 	return return_value;

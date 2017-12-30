@@ -47,4 +47,4 @@ typedef struct {
 	char tag[TAG_LEN];
 }CDB;
 
-bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
+bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter);
