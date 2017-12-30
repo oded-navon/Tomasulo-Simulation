@@ -12,18 +12,5 @@
 #define MAX_INST_NUM (4096)
 #define MAX_CDB_NUM (4096)
 
-int parse_args(char* argv[]);
-typedef struct {
-	int dst;
-	int rs1;
-	int rs2;
-	int action_type;
-}RS;
 
-typedef struct {
-	int timer;
-	int r_d;
-	int rs0;
-	int rs1;
-	int calc_type;
-}calc_unit;
+int parse_args(char* argv[]);
