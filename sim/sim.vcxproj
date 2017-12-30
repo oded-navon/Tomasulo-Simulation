@@ -143,13 +143,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArgParser.h" />
-    <ClInclude Include="Dispatch.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArgParser.c" />
-    <ClCompile Include="Dispatch.c" />
     <ClCompile Include="Main.c" />
     <ClCompile Include="Utils.c" />
   </ItemGroup>

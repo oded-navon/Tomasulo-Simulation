@@ -1,21 +1,15 @@
 #include "Main.h"
 #include "Utils.h"
 
-config_args* config_args_read;
-inst** instructions;
-iq iq_arr = {
-	.front = 0,
-	.last = -1,
-	.num_items = 0
-}; //our instruction queue
-
 
 inst* instructions[MAX_INST_NUM];
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
+
+
+
 inst_ex* _instructions_executed[MAX_INST_NUM];
-config_args* config_args_read;
+config_args* _config_args_read;
 inst** instructions;
-inst* iq[16]; //our instruction queue
 int last_unoccupied_index_in_iq = 0;
 inst* _instructions[MAX_INST_NUM];
 int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
@@ -47,7 +41,7 @@ void fetch_instruction()
 {
 	if (is_queue_full(iq_arr) && (current_inst_in_instructions < num_of_inst))
 	{
-		enqueue(iq_arr,instructions[current_inst_in_instructions]);
+		enqueue(_instructions[current_inst_in_instructions]);
 		current_inst_in_instructions++;
 	}
 }
@@ -105,13 +99,13 @@ int get_free_reservation_station_index(int opcode)
 			return NULL;
 		case 2:
 		case 3:
-			res = get_free_reservation_station_index(rs_add, config_args_read->add_nr_reservation);
+			res = get_free_reservation_station_index(rs_add, _config_args_read->add_nr_reservation);
 			break;
 		case 4:
-			res = get_free_reservation_station_index(rs_mul, config_args_read->mul_nr_reservation);
+			res = get_free_reservation_station_index(rs_mul, _config_args_read->mul_nr_reservation);
 			break;
 		case 5:
-			res = get_free_reservation_station_index(rs_div, config_args_read->div_nr_reservation);
+			res = get_free_reservation_station_index(rs_div, _config_args_read->div_nr_reservation);
 			break;
 	}
 
@@ -139,10 +133,10 @@ int get_free_reservation_station_index(RS rses[], int num_rses)
 	return value:
 	empty array - means that the inputs are ready
 	otherwise - all instructions we must wait for them to be completed*/
-	inst** res = malloc(sizeof(inst)*MAX_INST_NUM);
+/*	inst** res = malloc(sizeof(inst)*MAX_INST_NUM);
 
 	return res;
-}	  
+}*/	  
 
 int issue()
 {
@@ -173,10 +167,10 @@ void put_inst_in_RS(int rs_index,inst* instr,int type, int dst, int src0, int sr
 
 		break;
 	case 4:
-		res = get_free_reservation_station_index(rs_mul, config_args_read->mul_nr_reservation);
+		//res = get_free_reservation_station_index(rs_mul, config_args_read->mul_nr_reservation);
 		break;
 	case 5:
-		res = get_free_reservation_station_index(rs_div, config_args_read->div_nr_reservation);
+		//res = get_free_reservation_station_index(rs_div, config_args_read->div_nr_reservation);
 		break;
 	}
 	//rs = &rs_type[i];
@@ -198,15 +192,20 @@ int issue_instruction()
 	/*return 1 if issued instruction successfully, else 0*/
 	
 	//inst* inst = take_next_instruction_from_IQ();
-	inst* instr = peek(iq_arr);
-	int type = instr->inst_code;
+	inst* instr = peek();
+	int type = instr->opcode;
 	int rs_index = get_free_reservation_station_index(type);
 	if (rs_index == NO_RS_AVAILABLE)	
 	{
 		return 0;
 	}
 
-	put_inst_in_RS(rs_index,instr,type);
+	int dst = 0;
+	int src0 = 0;
+	int src1 = 0;
+	char* src0_name;
+	char* src1_name;
+	put_inst_in_RS(rs_index, instr, type, dst, src0, src1,  src0_name,  src1_name);
 
 	
 	//tag_dest_register_of_inst(inst);

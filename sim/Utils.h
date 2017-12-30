@@ -3,17 +3,19 @@
 #include <stdbool.h>
 
 #define RS_NAME_LEN (10)
-<<<<<<< HEAD
 #define MAX_ITEMS 16
 #define TAG_LEN (10)
 
-=======
 #define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
 #define MEMORY_IMAGE_INPUT_SIZE (4096)
 #define MAX_INST_NUM (4096)
 #define MAX_CDB_NUM (4096)
->>>>>>> dfcba872cdf65cd25d8a3dbb8197fd444db1fe4f
+iq iq_arr = {
+	.front = 0,
+	.last = -1,
+	.num_items = 0
+}; //our instruction queue
 
 typedef struct {
 	int dst;
@@ -38,11 +40,16 @@ typedef struct {
 typedef struct {
 	int timer;
 	int dst;
-<<<<<<< HEAD
-	int rs0;
-	int rs1;
-	int calc_type;
+	int src0;
+	int src1;
+	calc_unit_type calc_type;
 }calc_unit;
+
+typedef enum {
+	ADD,
+	MUL,
+	DIV
+}calc_unit_type;
 
 typedef struct {
 	inst inst_arr[MAX_ITEMS];
@@ -51,16 +58,15 @@ typedef struct {
 	int num_items;
 }iq;
 
-int peek(iq iq_arr);
-void enqueue(iq data);
 
-int dequeue(iq iq_arr);
-bool is_queue_full(iq iq_arr);
-=======
-	int src0;
-	int src1;
-	calc_unit_type calc_type;
-}calc_unit;
+
+
+inst* peek();
+void enqueue(inst* data);
+
+inst* dequeue();
+bool is_queue_full();
+	
 
 typedef enum {
 	config_parse,
@@ -116,9 +122,4 @@ typedef struct {
 	char tag[TAG_LEN];
 }CDB;
 
-typedef enum {
-	ADD,
-	MUL,
-	DIV
-}calc_unit_type;
->>>>>>> dfcba872cdf65cd25d8a3dbb8197fd444db1fe4f
+

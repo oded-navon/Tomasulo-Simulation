@@ -21,9 +21,6 @@
     <ClInclude Include="Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dispatch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,9 +30,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArgParser.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dispatch.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils.c">
