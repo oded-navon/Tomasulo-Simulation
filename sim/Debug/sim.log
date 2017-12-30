@@ -1,9 +1,7 @@
 ﻿  Main.c
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(50): warning C4047: 'function': 'void **' differs in levels of indirection from 'int (*)[4096]'
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(50): warning C4022: 'parse_file': pointer mismatch for actual parameter 3
+c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(63): warning C4047: 'function': 'void **' differs in levels of indirection from 'int (*)[4096]'
+c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\main.c(63): warning C4022: 'parse_file': pointer mismatch for actual parameter 3
   ArgParser.c
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(54): error C2198: 'parse_config_file_line': too few arguments for call
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(297): warning C4028: formal parameter 2 different from declaration
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(303): error C2082: redefinition of formal parameter 'output_config_arg'
-c:\users\oded_navon\documents\visual studio 2015\projects\sim\sim\argparser.c(313): error C2059: syntax error: ')'
   Generating Code...
+  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.exe
+  sim.vcxproj -> C:\Users\Oded_navon\documents\visual studio 2015\Projects\sim\Debug\sim.pdb (Full PDB)

@@ -240,3 +240,9 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+Debug/sim.exe
+Debug/sim.ilk
+Debug/sim.exe
+sim/Debug/sim.log
+sim/Debug/ArgParser.obj
+*.obj
