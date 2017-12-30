@@ -8,10 +8,10 @@
 
 
 typedef enum {
-	config_line,
-	memin_line,
-	inst_line,
-	cdb_line
+	config_parse,
+	memin_parse,
+	inst_parse,
+	cdb_parse
 } parse_type;
 
 typedef struct {
@@ -51,3 +51,4 @@ bool parse_config_file(char* config_file_path, config_args* output_config_args);
 bool parse_memin_file(char* memin_file_path, int* output_memory_image);
 bool parse_traceinst_file(char* traceinst_file_path, inst** output_inst_args);
 bool parse_cdb_file(char* cdb_file_path, CDB** output_cdb_args);
+bool parse_file(char* file_path, parse_type parsing_type, void** output_object);

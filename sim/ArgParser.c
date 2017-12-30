@@ -50,13 +50,13 @@ bool parse_line(char* line, parse_type line_parsing_type, void* output)
 {
 	switch (line_parsing_type)
 	{
-		case config_line:
-			return parse_cdb_file_line(line, output);
-		case memin_line:
+		case config_parse:
+			return parse_config_file_line(line, output);
+		case memin_parse:
 			return parse_memin_file_line(line, output);
-		case inst_line:
+		case inst_parse:
 			return parse_inst_file_line(line, output);
-		case cdb_line:
+		case cdb_parse:
 			return parse_cdb_file_line(line, output);
 		default:
 			return false;
@@ -293,13 +293,14 @@ cleanup:
 	return return_value;
 }
 
-bool parse_config_file_line(char* line, int* output_config_value, char* output_config_arg)
+bool parse_config_file_line(char* line, config_args* output_config_args, char* output_config_arg)
 {
 	char* token = strtok(line, " = ");
 	if (token == NULL)
 	{
 		return false;
 	}
+	char output_config_arg[MAX_STR_LEN];
 	strncpy(output_config_arg, token, MAX_STR_LEN);
 
 	char* arg_value = strtok(NULL, " = ");
@@ -307,7 +308,9 @@ bool parse_config_file_line(char* line, int* output_config_value, char* output_c
 	{
 		return false;
 	}
-	*output_config_value = parse_int_number(arg_value);
+	int output_config_value = parse_int_number(arg_value);
+
+	if (!insert_arg_to_struct(output_config_args,)
 
 	return true;
 }
