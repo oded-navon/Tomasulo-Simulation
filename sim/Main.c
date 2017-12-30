@@ -12,6 +12,13 @@ iq iq_arr = {
 
 inst* instructions[MAX_INST_NUM];
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
+inst_ex* _instructions_executed[MAX_INST_NUM];
+config_args* config_args_read;
+inst** instructions;
+inst* iq[16]; //our instruction queue
+int last_unoccupied_index_in_iq = 0;
+inst* _instructions[MAX_INST_NUM];
+int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 CDB** cdb;
 unsigned int cycles = 0;
 int num_of_inst;
@@ -128,6 +135,14 @@ int get_free_reservation_station_index(RS rses[], int num_rses)
 //
 //	return res;
 //}	  
+	/*will determine whether the inputs for the current instruction are already ready, or are they gonna be produced by some of the instructions that haven't yet broadcasted their results
+	return value:
+	empty array - means that the inputs are ready
+	otherwise - all instructions we must wait for them to be completed*/
+	inst** res = malloc(sizeof(inst)*MAX_INST_NUM);
+
+	return res;
+}	  
 
 int issue()
 {
@@ -261,40 +276,34 @@ int parse_args(char* argv[])
 	char* trace_cdb_path = argv[6];
 
 	int return_value = SUCCESS;
-	cleanup_type cleanup_ret = cleanup_all;
+	cleanup_type cleanup_ret = cleanup_config;
 
-	config_args_read = malloc(sizeof(config_args));
-	if (config_args_read == NULL)
+	_config_args_read = malloc(sizeof(config_args));
+	if (_config_args_read == NULL)
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
 
-	if (!parse_file(config_file_path, config_parse, &config_args_read, NULL))
+	if (!parse_file(config_file_path, config_parse, &_config_args_read, NULL))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
 
-	if (!parse_file(memory_in_path, memin_parse, &memory_image_input, NULL))
+	if (!parse_file(memory_in_path, memin_parse, &_memory_image_input, NULL))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
-
-	if (instructions == NULL)
-	{
-		return_value = FAIL;
-		cleanup_ret = cleanup_inst_and_config;
-		goto cleanup;
-	}
+	
 	for (int i = 0; i < MAX_INST_NUM; i++)
 	{
-		instructions[i] = malloc(sizeof(inst));
-		if (instructions[i] == NULL)
+		_instructions[i] = malloc(sizeof(inst));
+		if (_instructions[i] == NULL)
 		{
 			return_value = FAIL;
 			cleanup_ret = cleanup_inst_and_config;
@@ -302,7 +311,20 @@ int parse_args(char* argv[])
 		}
 	}
 
-	if (!parse_file(trace_inst_path, inst_parse, instructions, &num_of_inst))
+	convert_mem_to_inst(_memory_image_input, _instructions);
+
+	/*for (int i = 0; i < MAX_INST_NUM; i++)
+	{
+		_instructions_executed[i] = malloc(sizeof(inst_ex));
+		if (_instructions_executed[i] == NULL)
+		{
+			return_value = FAIL;
+			cleanup_ret = cleanup_inst_and_config;
+			goto cleanup;
+		}
+	}
+
+	if (!parse_file(trace_inst_path, inst_parse, _instructions_executed, &num_of_inst))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_inst_and_config;
@@ -332,7 +354,7 @@ int parse_args(char* argv[])
 		return_value = FAIL;
 		cleanup_ret = cleanup_all;
 		goto cleanup;
-	}
+	}*/
 
 cleanup:
 	cleanup(cleanup_ret);
@@ -344,18 +366,18 @@ void cleanup(cleanup_type clean_type)
 {
 	switch (clean_type)
 	{
-		case cleanup_all:
+		/*case cleanup_all:
 			for (int i = 0; i < MAX_CDB_NUM; i++)
 			{
 				free(cdb[i]);
 			}
-			free(cdb);
+			free(cdb);*/
 		case cleanup_inst_and_config:
 			for (int i = 0; i < MAX_INST_NUM; i++)
 			{
-				free(instructions[i]);
+				free(_instructions_executed[i]);
 			}
 		case cleanup_config:
-			free(config_args_read);
+			free(_config_args_read);
 	}
 }

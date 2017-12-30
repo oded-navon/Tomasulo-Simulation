@@ -3,16 +3,34 @@
 #include <stdlib.h>
 
 #define MAX_STR_LEN (100)
-
+#define HALT_OPCODE (6)
 
 bool parse_config_file_line(char* line, config_args* output_config_args);
 bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_val);
 bool parse_cdb_file_line(char* line, CDB* output_cdb);
 bool parse_memin_file_line(char* line, int* memory_word);
-bool parse_inst_file_line(char* line, inst* output_inst_arg);
+bool parse_inst_file_line(char* line, inst_ex* output_inst_arg);
 double parse_double_number(char* double_number);
 int parse_int_number(char* int_number);
 int parse_hex_number(char* hex_number);
+
+
+void convert_mem_to_inst(int* memory_image, inst** output_insts)
+{
+	for (int i = 0; i < MAX_INST_NUM; i++)
+	{
+		if (output_insts[i]->opcode == HALT_OPCODE)
+		{
+			break;
+		}
+		
+		output_insts[i]->imm = memory_image[i] & inst_params_imm;
+		output_insts[i]->src1 = (memory_image[i] & inst_params_src1) >> 12;
+		output_insts[i]->src0 = (memory_image[i] & inst_params_src0) >> 16;
+		output_insts[i]->dst = (memory_image[i] & inst_params_dst) >> 20;
+		output_insts[i]->opcode = (memory_image[i] & inst_params_opcode) >> 24;
+	}
+}
 
 
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter)
@@ -40,7 +58,7 @@ bool parse_file(char* file_path, parse_type parsing_type, void** output_object, 
 				parsed_correctly = parse_memin_file_line(line, num_output);
 				break;
 			case inst_parse:
-				parsed_correctly = parse_inst_file_line(line, ((inst**)output_object)[cnt]);
+				parsed_correctly = parse_inst_file_line(line, ((inst_ex**)output_object)[cnt]);
 				break;
 			case cdb_parse:
 				parsed_correctly = parse_cdb_file_line(line, ((CDB**)output_object)[cnt]);
@@ -109,7 +127,7 @@ bool parse_cdb_file_line(char* line, CDB* output_cdb)
 	return true;
 }
 
-bool parse_inst_file_line(char* line, inst* output_inst_arg)
+bool parse_inst_file_line(char* line, inst_ex* output_inst_arg)
 {
 	char* token = strtok(line, " ");
 	if (token == NULL)
