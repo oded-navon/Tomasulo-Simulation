@@ -5,6 +5,7 @@
 #include <tchar.h>
 #include <stdbool.h>
 #include "ArgParser.h"
+#include "Utils.h"
 
 #define SUCCESS (0)
 #define FAIL (-1)
