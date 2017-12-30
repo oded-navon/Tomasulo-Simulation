@@ -105,7 +105,7 @@ RS* get_free_reservation_station(inst* inst)
 
 inst** determine_where_inputs_come_from(inst inst)
 {
-	/*will determine wether the inputs for the current instruction are already ready, or are they gonna be produced by some of the instructions that haven't yet broadcasted their results
+	/*will determine whether the inputs for the current instruction are already ready, or are they gonna be produced by some of the instructions that haven't yet broadcasted their results
 	return value:
 	empty array - means that the inputs are ready
 	otherwise - all instructions we must wait for them to be completed*/
