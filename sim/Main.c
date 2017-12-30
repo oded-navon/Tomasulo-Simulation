@@ -1,16 +1,19 @@
 #include "Main.h"
 
-
-config_args* config_args_read;
-inst* instructions[MAX_INST_NUM];
-int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
+//TODO: remove parsing for cdb and and _instructions_executed
+config_args* _config_args_read;
+inst_ex* _instructions_executed[MAX_INST_NUM];
+inst* _instructions[MAX_INST_NUM];
+int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 CDB** cdb;
+
+
 
 int num_of_inst;
 int num_of_cdb;
 
 typedef enum {
-	cleanup_all,
+	//cleanup_all,
 	cleanup_inst_and_config,
 	cleanup_config
 } cleanup_type;
@@ -43,40 +46,34 @@ int parse_args(char* argv[])
 	char* trace_cdb_path = argv[6];
 
 	int return_value = SUCCESS;
-	cleanup_type cleanup_ret = cleanup_all;
+	cleanup_type cleanup_ret = cleanup_config;
 
-	config_args_read = malloc(sizeof(config_args));
-	if (config_args_read == NULL)
+	_config_args_read = malloc(sizeof(config_args));
+	if (_config_args_read == NULL)
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
 
-	if (!parse_file(config_file_path, config_parse, &config_args_read, NULL))
+	if (!parse_file(config_file_path, config_parse, &_config_args_read, NULL))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
 
-	if (!parse_file(memory_in_path, memin_parse, &memory_image_input, NULL))
+	if (!parse_file(memory_in_path, memin_parse, &_memory_image_input, NULL))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
 		goto cleanup;
 	}
-
-	if (instructions == NULL)
-	{
-		return_value = FAIL;
-		cleanup_ret = cleanup_inst_and_config;
-		goto cleanup;
-	}
+	
 	for (int i = 0; i < MAX_INST_NUM; i++)
 	{
-		instructions[i] = malloc(sizeof(inst));
-		if (instructions[i] == NULL)
+		_instructions[i] = malloc(sizeof(inst));
+		if (_instructions[i] == NULL)
 		{
 			return_value = FAIL;
 			cleanup_ret = cleanup_inst_and_config;
@@ -84,7 +81,20 @@ int parse_args(char* argv[])
 		}
 	}
 
-	if (!parse_file(trace_inst_path, inst_parse, instructions, &num_of_inst))
+	convert_mem_to_inst(_memory_image_input, _instructions);
+
+	/*for (int i = 0; i < MAX_INST_NUM; i++)
+	{
+		_instructions_executed[i] = malloc(sizeof(inst_ex));
+		if (_instructions_executed[i] == NULL)
+		{
+			return_value = FAIL;
+			cleanup_ret = cleanup_inst_and_config;
+			goto cleanup;
+		}
+	}
+
+	if (!parse_file(trace_inst_path, inst_parse, _instructions_executed, &num_of_inst))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_inst_and_config;
@@ -114,7 +124,7 @@ int parse_args(char* argv[])
 		return_value = FAIL;
 		cleanup_ret = cleanup_all;
 		goto cleanup;
-	}
+	}*/
 
 cleanup:
 	cleanup(cleanup_ret);
@@ -126,18 +136,18 @@ void cleanup(cleanup_type clean_type)
 {
 	switch (clean_type)
 	{
-		case cleanup_all:
+		/*case cleanup_all:
 			for (int i = 0; i < MAX_CDB_NUM; i++)
 			{
 				free(cdb[i]);
 			}
-			free(cdb);
+			free(cdb);*/
 		case cleanup_inst_and_config:
 			for (int i = 0; i < MAX_INST_NUM; i++)
 			{
-				free(instructions[i]);
+				free(_instructions_executed[i]);
 			}
 		case cleanup_config:
-			free(config_args_read);
+			free(_config_args_read);
 	}
 }

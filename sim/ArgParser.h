@@ -6,6 +6,9 @@
 
 #define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
+#define MEMORY_IMAGE_INPUT_SIZE (4096)
+#define MAX_INST_NUM (4096)
+#define MAX_CDB_NUM (4096)
 
 typedef enum {
 	config_parse,
@@ -29,6 +32,22 @@ typedef struct {
 	int	mem_nr_store_buffers;
 }config_args;
 
+typedef enum {
+	inst_params_imm = 4095,        // 00000000000000000000111111111111
+	inst_params_src1 = 61440,      // 00000000000000001111000000000000
+	inst_params_src0 = 983040,     // 00000000000011110000000000000000
+	inst_params_dst = 15728640,    // 00000000111100000000000000000000
+	inst_params_opcode = 251658240 // 00001111000000000000000000000000
+}inst_params;
+
+typedef struct {
+	int opcode;
+	int imm;
+	int src0;
+	int src1;
+	int dst;
+} inst;
+
 typedef struct {
 	int inst_code;
 	int pc;
@@ -37,7 +56,7 @@ typedef struct {
 	int cycle_ex_start;
 	int cycle_ex_end;
 	int write_cdb;
-}inst;
+}inst_ex;
 
 typedef struct {
 	int cycle;
@@ -48,3 +67,4 @@ typedef struct {
 }CDB;
 
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter);
+void convert_mem_to_inst(int* memory_image, inst** output_insts);
