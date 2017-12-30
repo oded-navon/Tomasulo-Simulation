@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+
 #define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
-
 
 typedef enum {
 	config_parse,
@@ -47,8 +47,4 @@ typedef struct {
 	char tag[TAG_LEN];
 }CDB;
 
-bool parse_config_file(char* config_file_path, config_args* output_config_args);
-bool parse_memin_file(char* memin_file_path, int* output_memory_image);
-bool parse_traceinst_file(char* traceinst_file_path, inst** output_inst_args);
-bool parse_cdb_file(char* cdb_file_path, CDB** output_cdb_args);
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
