@@ -9,13 +9,14 @@
 #define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
 #define MEMORY_IMAGE_INPUT_SIZE (4096)
+#define SUCCESS (0)
+#define FAIL (-1)
+#define MEMORY_IMAGE_INPUT_SIZE (4096)
 #define MAX_INST_NUM (4096)
 #define MAX_CDB_NUM (4096)
-iq iq_arr = {
-	.front = 0,
-	.last = -1,
-	.num_items = 0
-}; //our instruction queue
+#define MAX_CONFIG_SIZE (64)
+#define NO_RS_AVAILABLE (MAX_CONFIG_SIZE*2)
+
 
 typedef struct {
 	int dst;
@@ -35,7 +36,21 @@ typedef struct {
 	int cycle_ex_start;
 	int cycle_ex_end;
 	int write_cdb;
-}inst;
+}inst_ex;
+
+typedef struct {
+	int opcode;
+	int imm;
+	int src0;
+	int src1;
+	int dst;
+} inst;
+
+typedef enum {
+	ADD,
+	MUL,
+	DIV
+}calc_unit_type;
 
 typedef struct {
 	int timer;
@@ -45,28 +60,18 @@ typedef struct {
 	calc_unit_type calc_type;
 }calc_unit;
 
-typedef enum {
-	ADD,
-	MUL,
-	DIV
-}calc_unit_type;
-
 typedef struct {
-	inst inst_arr[MAX_ITEMS];
+	inst* inst_arr[MAX_ITEMS];
 	int front;
 	int last;
 	int num_items;
 }iq;
 
-
-
-
-inst* peek();
-void enqueue(inst* data);
-
-inst* dequeue();
-bool is_queue_full();
-	
+typedef enum {
+	cleanup_all,
+	cleanup_inst_and_config,
+	cleanup_config
+} cleanup_type;
 
 typedef enum {
 	config_parse,
@@ -97,24 +102,6 @@ typedef enum {
 }inst_params;
 
 typedef struct {
-	int opcode;
-	int imm;
-	int src0;
-	int src1;
-	int dst;
-} inst;
-
-typedef struct {
-	int inst_code;
-	int pc;
-	char tag[TAG_LEN];
-	int cycle_issued;
-	int cycle_ex_start;
-	int cycle_ex_end;
-	int write_cdb;
-}inst_ex;
-
-typedef struct {
 	int cycle;
 	int pc;
 	char cdb_name[CDB_NAME_LEN];
@@ -123,3 +110,4 @@ typedef struct {
 }CDB;
 
 
+void cleanup(cleanup_type clean_type);

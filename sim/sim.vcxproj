@@ -143,12 +143,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArgParser.h" />
+    <ClInclude Include="Broadcast.h" />
+    <ClInclude Include="Dispatch.h" />
+    <ClInclude Include="Execute.h" />
+    <ClInclude Include="Fetch.h" />
+    <ClInclude Include="Issue.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Queue.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArgParser.c" />
+    <ClCompile Include="Broadcast.c" />
+    <ClCompile Include="Dispatch.c" />
+    <ClCompile Include="Execute.c" />
+    <ClCompile Include="Fetch.c" />
+    <ClCompile Include="Globals.c" />
+    <ClCompile Include="Issue.c" />
     <ClCompile Include="Main.c" />
+    <ClCompile Include="Queue.c" />
     <ClCompile Include="Utils.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

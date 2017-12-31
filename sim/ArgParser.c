@@ -10,9 +10,74 @@ bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_va
 bool parse_cdb_file_line(char* line, CDB* output_cdb);
 bool parse_memin_file_line(char* line, int* memory_word);
 bool parse_inst_file_line(char* line, inst_ex* output_inst_arg);
+bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
+void convert_mem_to_inst(int* memory_image, inst** output_insts);
+
 double parse_double_number(char* double_number);
 int parse_int_number(char* int_number);
 int parse_hex_number(char* hex_number);
+
+extern config_args* _config_args_read;
+extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
+extern inst* _instructions[MAX_INST_NUM];
+
+int parse_args(char* argv[])
+{
+	//command line input
+	//sim cfg.txt memin.txt memout.txt regout.txt traceinst.txt tracecdb.txt
+	char* config_file_path = argv[1];
+	char* memory_in_path = argv[2];
+	char* memory_out_path = argv[3];
+	char* reg_out_path = argv[4];
+	char* trace_inst_path = argv[5];
+	char* trace_cdb_path = argv[6];
+
+	int return_value = SUCCESS;
+	cleanup_type cleanup_ret = cleanup_config;
+
+	_config_args_read = malloc(sizeof(config_args));
+	if (_config_args_read == NULL)
+	{
+		return_value = FAIL;
+		cleanup_ret = cleanup_config;
+		goto cleanup_fail;
+	}
+
+	if (!parse_file(config_file_path, config_parse, &_config_args_read))
+	{
+		return_value = FAIL;
+		cleanup_ret = cleanup_config;
+		goto cleanup_fail;
+	}
+
+	if (!parse_file(memory_in_path, memin_parse, &_memory_image_input))
+	{
+		return_value = FAIL;
+		cleanup_ret = cleanup_config;
+		goto cleanup_fail;
+	}
+
+	for (int i = 0; i < MAX_INST_NUM; i++)
+	{
+		_instructions[i] = malloc(sizeof(inst));
+		if (_instructions[i] == NULL)
+		{
+			return_value = FAIL;
+			cleanup_ret = cleanup_inst_and_config;
+			goto cleanup_fail;
+		}
+	}
+
+	convert_mem_to_inst(_memory_image_input, _instructions);
+	goto ret;
+
+cleanup_fail:
+	cleanup(cleanup_ret);
+ret:
+	return return_value;
+}
+
+
 
 
 void convert_mem_to_inst(int* memory_image, inst** output_insts)
@@ -33,7 +98,8 @@ void convert_mem_to_inst(int* memory_image, inst** output_insts)
 }
 
 
-bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter)
+
+bool parse_file(char* file_path, parse_type parsing_type, void** output_object)
 {
 	bool return_value = true;
 	FILE* file = fopen(file_path, "r");
@@ -57,12 +123,6 @@ bool parse_file(char* file_path, parse_type parsing_type, void** output_object, 
 				num_output = ((int*)output_object) + cnt;
 				parsed_correctly = parse_memin_file_line(line, num_output);
 				break;
-			case inst_parse:
-				parsed_correctly = parse_inst_file_line(line, ((inst_ex**)output_object)[cnt]);
-				break;
-			case cdb_parse:
-				parsed_correctly = parse_cdb_file_line(line, ((CDB**)output_object)[cnt]);
-				break;
 			default:
 				parsed_correctly = false;
 		}
@@ -77,15 +137,111 @@ bool parse_file(char* file_path, parse_type parsing_type, void** output_object, 
 	}
 
 cleanup:
-	if (counter != NULL)
-	{
-		*counter = cnt;
-	}
 	fclose(file);
 	free(line);
 	return return_value;
 }
 
+bool parse_memin_file_line(char* line, int* memory_word)
+{
+	*memory_word = parse_hex_number(line);
+	return true;
+}
+
+bool parse_config_file_line(char* line, config_args* output_config_args)
+{
+	char* token = strtok(line, " = ");
+	if (token == NULL)
+	{
+		return false;
+	}
+	char output_config_arg[MAX_STR_LEN];
+	strncpy(output_config_arg, token, sizeof(output_config_arg));
+
+	char* arg_value = strtok(NULL, " = ");
+	if (arg_value == NULL)
+	{
+		return false;
+	}
+	int output_config_value = parse_int_number(arg_value);
+
+	return insert_arg_to_struct(output_config_args, output_config_arg, output_config_value);
+}
+
+bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_val)
+{
+	if (strncmp(arg, "add_nr_units", MAX_STR_LEN) == 0)
+	{
+		output_config_args->add_nr_units = arg_val;
+	}
+	else if (strncmp(arg, "mul_nr_units", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mul_nr_units = arg_val;
+	}
+	else if (strncmp(arg, "div_nr_units", MAX_STR_LEN) == 0)
+	{
+		output_config_args->div_nr_units = arg_val;
+	}
+	else if (strncmp(arg, "add_nr_reservation", MAX_STR_LEN) == 0)
+	{
+		output_config_args->add_nr_reservation = arg_val;
+	}
+	else if (strncmp(arg, "mul_nr_reservation", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mul_nr_reservation = arg_val;
+	}
+	else if (strncmp(arg, "div_nr_reservation", MAX_STR_LEN) == 0)
+	{
+		output_config_args->div_nr_reservation = arg_val;
+	}
+	else if (strncmp(arg, "add_delay", MAX_STR_LEN) == 0)
+	{
+		output_config_args->add_delay = arg_val;
+	}
+	else if (strncmp(arg, "mul_delay", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mul_delay = arg_val;
+	}
+	else if (strncmp(arg, "div_delay", MAX_STR_LEN) == 0)
+	{
+		output_config_args->div_delay = arg_val;
+	}
+	else if (strncmp(arg, "mem_delay", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mem_delay = arg_val;
+	}
+	else if (strncmp(arg, "mem_nr_load_buffers", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mem_nr_load_buffers = arg_val;
+	}
+	else if (strncmp(arg, "mem_nr_store_buffers", MAX_STR_LEN) == 0)
+	{
+		output_config_args->mem_nr_store_buffers = arg_val;
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+
+int parse_hex_number(char* hex_number)
+{
+	return (int)strtol(hex_number, NULL, 16);
+}
+
+int parse_int_number(char* int_number)
+{
+	return atoi(int_number);
+}
+
+double parse_double_number(char* double_number)
+{
+	return atof(double_number);
+}
+
+
+// TODO: redundant code for input parsing, but useful for writing the output files
 bool parse_cdb_file_line(char* line, CDB* output_cdb)
 {
 	char* token = strtok(line, " ");
@@ -180,103 +336,4 @@ bool parse_inst_file_line(char* line, inst_ex* output_inst_arg)
 	output_inst_arg->write_cdb = parse_int_number(token);
 
 	return true;
-}
-
-bool parse_memin_file_line(char* line, int* memory_word)
-{
-	*memory_word = parse_hex_number(line);
-	return true;
-}
-
-bool parse_config_file_line(char* line, config_args* output_config_args)
-{
-	char* token = strtok(line, " = ");
-	if (token == NULL)
-	{
-		return false;
-	}
-	char output_config_arg[MAX_STR_LEN];
-	strncpy(output_config_arg, token, sizeof(output_config_arg));
-
-	char* arg_value = strtok(NULL, " = ");
-	if (arg_value == NULL)
-	{
-		return false;
-	}
-	int output_config_value = parse_int_number(arg_value);
-
-	return insert_arg_to_struct(output_config_args, output_config_arg, output_config_value);
-}
-
-
-bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_val)
-{
-	if (strncmp(arg, "add_nr_units", MAX_STR_LEN) == 0)
-	{
-		output_config_args->add_nr_units = arg_val;
-	}
-	else if (strncmp(arg, "mul_nr_units", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mul_nr_units = arg_val;
-	}
-	else if (strncmp(arg, "div_nr_units", MAX_STR_LEN) == 0)
-	{
-		output_config_args->div_nr_units = arg_val;
-	}
-	else if (strncmp(arg, "add_nr_reservation", MAX_STR_LEN) == 0)
-	{
-		output_config_args->add_nr_reservation = arg_val;
-	}
-	else if (strncmp(arg, "mul_nr_reservation", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mul_nr_reservation = arg_val;
-	}
-	else if (strncmp(arg, "div_nr_reservation", MAX_STR_LEN) == 0)
-	{
-		output_config_args->div_nr_reservation = arg_val;
-	}
-	else if (strncmp(arg, "add_delay", MAX_STR_LEN) == 0)
-	{
-		output_config_args->add_delay = arg_val;
-	}
-	else if (strncmp(arg, "mul_delay", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mul_delay = arg_val;
-	}
-	else if (strncmp(arg, "div_delay", MAX_STR_LEN) == 0)
-	{
-		output_config_args->div_delay = arg_val;
-	}
-	else if (strncmp(arg, "mem_delay", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mem_delay = arg_val;
-	}
-	else if (strncmp(arg, "mem_nr_load_buffers", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mem_nr_load_buffers = arg_val;
-	}
-	else if (strncmp(arg, "mem_nr_store_buffers", MAX_STR_LEN) == 0)
-	{
-		output_config_args->mem_nr_store_buffers = arg_val;
-	}
-	else
-	{
-		return false;
-	}
-	return true;
-}
-
-int parse_hex_number(char* hex_number)
-{
-	return (int)strtol(hex_number, NULL, 16);
-}
-
-int parse_int_number(char* int_number)
-{
-	return atoi(int_number);
-}
-
-double parse_double_number(char* double_number)
-{
-	return atof(double_number);
 }

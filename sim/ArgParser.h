@@ -8,5 +8,4 @@
 #define CDB_NAME_LEN (5)
 
 
-bool parse_file(char* file_path, parse_type parsing_type, void** output_object, int* counter);
-void convert_mem_to_inst(int* memory_image, inst** output_insts);
+int parse_args(char* argv[]);
