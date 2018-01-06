@@ -3,8 +3,9 @@
 #include <stdbool.h>
 
 #define RS_NAME_LEN (10)
-#define MAX_ITEMS 16
+#define MAX_ITEMS (16)
 #define TAG_LEN (10)
+#define NUM_OF_REGS (16)
 
 #define TAG_LEN (10)
 #define CDB_NAME_LEN (5)
@@ -18,13 +19,50 @@
 #define NO_RS_AVAILABLE (MAX_CONFIG_SIZE*2)
 
 
+typedef enum {
+	ADD_calc_unit,
+	MUL_calc_unit,
+	DIV_calc_unit
+}calc_unit_type;
+
+typedef enum {
+	LD_opcode,
+	ST_opcode,
+	ADD_opcode,
+	SUB_opcode,
+	MULT_opcode,
+	DIV_opcode,
+	HALT_opcode
+}inst_opcodes;
+
+typedef enum {
+	inst_params_imm = 4095,        // 00000000000000000000111111111111
+	inst_params_src1 = 61440,      // 00000000000000001111000000000000
+	inst_params_src0 = 983040,     // 00000000000011110000000000000000
+	inst_params_dst = 15728640,    // 00000000111100000000000000000000
+	inst_params_opcode = 251658240 // 00001111000000000000000000000000
+}inst_params;
+
+typedef enum {
+	cleanup_all,
+	cleanup_inst_and_config,
+	cleanup_config
+} cleanup_type;
+
+typedef enum {
+	config_parse,
+	memin_parse
+} parse_type;
+
+
+
 typedef struct {
 	int dst;
-	int src0;
-	int src1;
+	float src0;
+	float src1;
 	char rs_waiting0[RS_NAME_LEN];
 	char rs_waiting1[RS_NAME_LEN];
-	int action_type;
+	inst_opcodes action_type;
 	bool occupied;
 }RS;
 
@@ -46,12 +84,6 @@ typedef struct {
 	int dst;
 } inst;
 
-typedef enum {
-	ADD,
-	MUL,
-	DIV
-}calc_unit_type;
-
 typedef struct {
 	int timer;
 	int dst;
@@ -60,23 +92,25 @@ typedef struct {
 	calc_unit_type calc_type;
 }calc_unit;
 
-typedef struct {
+typedef struct queue_node {
+	inst* node_inst;
+	struct queue_node* next;
+	struct queue_node* prev;
+} queue_node_t;
+
+/*typedef struct {
 	inst* inst_arr[MAX_ITEMS];
 	int front;
 	int last;
 	int num_items;
-}iq;
+}inst_queue;*/
 
-typedef enum {
-	cleanup_all,
-	cleanup_inst_and_config,
-	cleanup_config
-} cleanup_type;
-
-typedef enum {
-	config_parse,
-	memin_parse
-} parse_type;
+typedef struct {
+	queue_node_t* head;
+	queue_node_t* tail;
+	int num_items_in_queue;
+	int queue_max_size;
+}inst_queue;
 
 typedef struct {
 	int add_nr_units;
@@ -93,14 +127,6 @@ typedef struct {
 	int	mem_nr_store_buffers;
 }config_args;
 
-typedef enum {
-	inst_params_imm = 4095,        // 00000000000000000000111111111111
-	inst_params_src1 = 61440,      // 00000000000000001111000000000000
-	inst_params_src0 = 983040,     // 00000000000011110000000000000000
-	inst_params_dst = 15728640,    // 00000000111100000000000000000000
-	inst_params_opcode = 251658240 // 00001111000000000000000000000000
-}inst_params;
-
 typedef struct {
 	int cycle;
 	int pc;
@@ -109,5 +135,11 @@ typedef struct {
 	char tag[TAG_LEN];
 }CDB;
 
+typedef struct {
+	bool occupied;
+	char rs[RS_NAME_LEN];
+}RAT_entry;
 
 void cleanup(cleanup_type clean_type);
+void init_regs();
+void init_rs_names_arrays();

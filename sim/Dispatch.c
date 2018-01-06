@@ -23,9 +23,9 @@ void Dispatch()
 	//move the ready inst to the relevant unit
 	for (int i = 0 ; i < NUM_OF_CALC_UNITS ; i++)
 	{
-		find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD);
-		find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV);
-		find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL);
+		find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD_calc_unit);
+		find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV_calc_unit);
+		find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL_calc_unit);
 	}
 }
 
@@ -51,13 +51,13 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 {
 	switch (unit_type)
 	{
-		case ADD:
+		case ADD_calc_unit:
 			unit_to_distpatch_to->timer = _config_args_read->add_delay;
 			break;
-		case DIV:
+		case DIV_calc_unit:
 			unit_to_distpatch_to->timer = _config_args_read->div_delay;
 			break;
-		case MUL:
+		case MUL_calc_unit:
 			unit_to_distpatch_to->timer = _config_args_read->mul_delay;
 			break;
 	}

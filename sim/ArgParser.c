@@ -11,7 +11,7 @@ bool parse_cdb_file_line(char* line, CDB* output_cdb);
 bool parse_memin_file_line(char* line, int* memory_word);
 bool parse_inst_file_line(char* line, inst_ex* output_inst_arg);
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
-void convert_mem_to_inst(int* memory_image, inst** output_insts);
+int convert_mem_to_inst(int* memory_image, inst** output_insts);
 
 double parse_double_number(char* double_number);
 int parse_int_number(char* int_number);
@@ -20,6 +20,7 @@ int parse_hex_number(char* hex_number);
 extern config_args* _config_args_read;
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern inst* _instructions[MAX_INST_NUM];
+extern int _num_of_inst;
 
 int parse_args(char* argv[])
 {
@@ -68,7 +69,7 @@ int parse_args(char* argv[])
 		}
 	}
 
-	convert_mem_to_inst(_memory_image_input, _instructions);
+	_num_of_inst = convert_mem_to_inst(_memory_image_input, _instructions);
 	goto ret;
 
 cleanup_fail:
@@ -80,12 +81,17 @@ ret:
 
 
 
-void convert_mem_to_inst(int* memory_image, inst** output_insts)
+int convert_mem_to_inst(int* memory_image, inst** output_insts)
 {
-	for (int i = 0; i < MAX_INST_NUM; i++)
+	int i;
+	for (i = 0; i < MAX_INST_NUM; i++)
 	{
+		// Check first what is the opcode of the inst, in case it's a HALT inst
+		output_insts[i]->opcode = (memory_image[i] & inst_params_opcode) >> 24;
+		
 		if (output_insts[i]->opcode == HALT_OPCODE)
 		{
+			// The other fields of the struct are already initialized to 0 so it's ok to break
 			break;
 		}
 		
@@ -93,8 +99,10 @@ void convert_mem_to_inst(int* memory_image, inst** output_insts)
 		output_insts[i]->src1 = (memory_image[i] & inst_params_src1) >> 12;
 		output_insts[i]->src0 = (memory_image[i] & inst_params_src0) >> 16;
 		output_insts[i]->dst = (memory_image[i] & inst_params_dst) >> 20;
-		output_insts[i]->opcode = (memory_image[i] & inst_params_opcode) >> 24;
 	}
+
+	// return the number of instructions found
+	return i+1;
 }
 
 
