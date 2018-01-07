@@ -87,8 +87,8 @@ typedef struct {
 typedef struct {
 	int timer;
 	int dst;
-	int src0;
-	int src1;
+	float src0;
+	float src1;
 	calc_unit_type calc_type;
 }calc_unit;
 
@@ -97,13 +97,6 @@ typedef struct queue_node {
 	struct queue_node* next;
 	struct queue_node* prev;
 } queue_node_t;
-
-/*typedef struct {
-	inst* inst_arr[MAX_ITEMS];
-	int front;
-	int last;
-	int num_items;
-}inst_queue;*/
 
 typedef struct {
 	queue_node_t* head;
@@ -143,3 +136,4 @@ typedef struct {
 void cleanup(cleanup_type clean_type);
 void init_regs();
 void init_rs_names_arrays();
+void clear_all_ex_units();

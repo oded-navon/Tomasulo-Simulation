@@ -2,4 +2,4 @@
 
 #include "Utils.h"
 
-void fetch();
+void Fetch();

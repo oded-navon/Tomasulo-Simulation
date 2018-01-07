@@ -9,6 +9,10 @@ extern char rs_add_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
 extern char rs_mul_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
 extern char rs_div_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
 
+extern calc_unit add_units[MAX_CONFIG_SIZE];
+extern calc_unit div_units[MAX_CONFIG_SIZE];
+extern calc_unit mul_units[MAX_CONFIG_SIZE];
+
 void cleanup(cleanup_type clean_type)
 {
 	switch (clean_type)
@@ -38,6 +42,22 @@ void init_rs_names_arrays()
 		snprintf(rs_add_names[i], RS_NAME_LEN, "ADD%d", i);
 		snprintf(rs_mul_names[i], RS_NAME_LEN, "MUL%d", i);
 		snprintf(rs_div_names[i], RS_NAME_LEN, "DIV%d", i);
+	}
+}
+
+void clear_all_ex_units()
+{
+	for (int i = 0; i < _config_args_read->mul_nr_units; i++)
+	{
+		mul_units[i].timer = -1;
+	}
+	for (int i = 0; i < _config_args_read->div_nr_units; i++)
+	{
+		div_units[i].timer = -1;
+	}
+	for (int i = 0; i < _config_args_read->add_nr_units; i++)
+	{
+		add_units[i].timer = -1;
 	}
 }
 

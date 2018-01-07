@@ -18,7 +18,7 @@ int get_specific_free_reservation_station_index(RS rses[], int num_rses);
 int put_inst_in_RS(inst* instr);
 void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* instr);
 
-void issue()
+void Issue()
 {
 	// try to issue an instruction
 	if (issue_instruction())
@@ -139,19 +139,19 @@ void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* ins
 	res_stations[free_station_index].action_type = instr->opcode;
 
 	//check if the registers are wait for values in RAT or they are ready
+	memset(res_stations[free_station_index].rs_waiting0, 0, RS_NAME_LEN);
 	if (RAT[instr->src0].occupied)
 	{
-		memset(res_stations[free_station_index].rs_waiting0, 0 , RS_NAME_LEN);
 		snprintf(res_stations[free_station_index].rs_waiting0, RS_NAME_LEN, "%s", RAT[instr->src0].rs);
 	}
 	else
 	{
 		res_stations[free_station_index].src0 = _regs[instr->src0];
 	}
-	
+
+	memset(res_stations[free_station_index].rs_waiting1, 0, RS_NAME_LEN);
 	if (RAT[instr->src1].occupied)
 	{
-		memset(res_stations[free_station_index].rs_waiting1, 0, RS_NAME_LEN);
 		snprintf(res_stations[free_station_index].rs_waiting1, RS_NAME_LEN, "%s", RAT[instr->src1].rs);
 	}
 	else

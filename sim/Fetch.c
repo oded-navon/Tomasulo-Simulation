@@ -17,7 +17,7 @@ void fetch_instruction()
 	}
 }
 
-void fetch()
+void Fetch()
 {
 	fetch_instruction();
 	fetch_instruction();

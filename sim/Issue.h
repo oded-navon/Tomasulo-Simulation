@@ -1,3 +1,3 @@
 #include "Utils.h"
 
-void issue();
+void Issue();

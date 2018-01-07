@@ -1,7 +1,6 @@
 #include "Dispatch.h"
 
 #define CALC_UNIT_IS_FREE (-1)
-#define NUM_OF_CALC_UNITS (3)
 
 extern config_args* _config_args_read;
 extern RS rs_add[MAX_CONFIG_SIZE];
@@ -18,27 +17,29 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 
 void Dispatch()
 {
-	//go over all the units to find which are free
-	//when you find a free unit, go over the RS to find a ready instruction
-	//move the ready inst to the relevant unit
-	for (int i = 0 ; i < NUM_OF_CALC_UNITS ; i++)
-	{
-		find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD_calc_unit);
-		find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV_calc_unit);
-		find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL_calc_unit);
-	}
+	//dispatch instructions for every unit type
+	find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD_calc_unit);
+	find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV_calc_unit);
+	find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL_calc_unit);
 }
 
+//go over all the units to find which are free
+//when you find a free unit, go over the RS to find a ready instruction
+//move the ready inst to the relevant unit
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type)
 {
+	// Go over all the calculation units of the same kind
 	for (int i = 0; i < num_of_calc_units; i++)
 	{
+		//Look for one which is free
 		if (calc_unit_to_disp_to[i].timer == CALC_UNIT_IS_FREE)
 		{
+			//When you find a free one, look for a free reservation station
 			for (int j = 0; j < num_of_rs_units; j++)
 			{
 				if (is_rs_inst_ready(&rs_unit_to_disp_from[j]))
 				{
+					//After you find a free one, dispatch it
 					dispatch_inst(&calc_unit_to_disp_to[i], &rs_unit_to_disp_from[j], unit_type);
 					break;
 				}
@@ -77,5 +78,5 @@ void clear_rs_inst(RS* inst_to_clear)
 
 bool is_rs_inst_ready(RS* inst)
 {
-	return (inst->occupied) && (inst->rs_waiting0 == NULL) && (inst->rs_waiting1 == NULL);
+	return (inst->occupied) && (*(inst->rs_waiting0) == '\0') && (*(inst->rs_waiting1) == '\0');
 }

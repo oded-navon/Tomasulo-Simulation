@@ -59,18 +59,19 @@ int main(int argc, char* argv[])
 
 	init_rs_names_arrays();
 	init_regs();
+	clear_all_ex_units();
 
 	_cycles = 0;
 	//while (instr_proc < instr_count) {
 	while (true){ //_current_inst_in_instructions <= _num_of_inst) {
 
-		fetch();
+		Fetch();
 		
-		issue();
+		Issue();
 		
-		/*Dispatch();
+		Dispatch();
 
-		Execute();
+		/*Execute();
 
 		//write_back();
 		Broadcast();*/
