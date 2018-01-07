@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define RS_NAME_LEN (10)
 #define MAX_ITEMS (16)
@@ -17,6 +18,8 @@
 #define MAX_CDB_NUM (4096)
 #define MAX_CONFIG_SIZE (64)
 #define NO_RS_AVAILABLE (MAX_CONFIG_SIZE*2)
+#define CALC_UNIT_IS_FREE (-1)
+#define CALC_UNIT_IS_READY (0)
 
 
 typedef enum {
@@ -64,6 +67,7 @@ typedef struct {
 	char rs_waiting1[RS_NAME_LEN];
 	inst_opcodes action_type;
 	bool occupied;
+	char name[RS_NAME_LEN];
 }RS;
 
 typedef struct {
@@ -90,6 +94,7 @@ typedef struct {
 	float src0;
 	float src1;
 	calc_unit_type calc_type;
+	RS* dst_rs;
 }calc_unit;
 
 typedef struct queue_node {

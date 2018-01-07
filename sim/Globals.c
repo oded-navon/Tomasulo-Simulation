@@ -1,9 +1,6 @@
 #include "Utils.h"
 
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
-
-
-
 inst_ex* _instructions_executed[MAX_INST_NUM];
 config_args* _config_args_read;
 int _last_unoccupied_index_in_iq;

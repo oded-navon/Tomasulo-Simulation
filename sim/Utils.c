@@ -13,6 +13,10 @@ extern calc_unit add_units[MAX_CONFIG_SIZE];
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
 
+extern RS rs_add[MAX_CONFIG_SIZE];
+extern RS rs_mul[MAX_CONFIG_SIZE];
+extern RS rs_div[MAX_CONFIG_SIZE];
+
 void cleanup(cleanup_type clean_type)
 {
 	switch (clean_type)
@@ -37,12 +41,21 @@ void init_regs()
 
 void init_rs_names_arrays()
 {
-	for (int i = 0; i < MAX_CONFIG_SIZE; i++)
+	for (int i = 0; i < _config_args_read->add_nr_reservation ; i++)
 	{
-		snprintf(rs_add_names[i], RS_NAME_LEN, "ADD%d", i);
-		snprintf(rs_mul_names[i], RS_NAME_LEN, "MUL%d", i);
-		snprintf(rs_div_names[i], RS_NAME_LEN, "DIV%d", i);
+		snprintf(rs_add[i].name, RS_NAME_LEN, "ADD%d", i);
 	}
+
+	for (int i = 0; i < _config_args_read->div_nr_reservation; i++)
+	{
+		snprintf(rs_div[i].name, RS_NAME_LEN, "DIV%d", i);
+	}
+	
+	for (int i = 0; i < _config_args_read->mul_nr_reservation; i++)
+	{
+		snprintf(rs_mul[i].name, RS_NAME_LEN, "MUL%d", i);
+	}
+
 }
 
 void clear_all_ex_units()

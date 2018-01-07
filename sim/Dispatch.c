@@ -1,6 +1,5 @@
 #include "Dispatch.h"
 
-#define CALC_UNIT_IS_FREE (-1)
 
 extern config_args* _config_args_read;
 extern RS rs_add[MAX_CONFIG_SIZE];
@@ -12,7 +11,6 @@ extern calc_unit mul_units[MAX_CONFIG_SIZE];
 
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
 bool is_rs_inst_ready(RS* inst);
-void clear_rs_inst(RS* inst_to_clear);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 
 void Dispatch()
@@ -67,14 +65,10 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->src0 = inst_to_dispatch->src0;
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
-
-	clear_rs_inst(inst_to_dispatch);
+	unit_to_distpatch_to->dst_rs = inst_to_dispatch;
 }
 
-void clear_rs_inst(RS* inst_to_clear)
-{
-	inst_to_clear->occupied = false;
-}
+
 
 bool is_rs_inst_ready(RS* inst)
 {

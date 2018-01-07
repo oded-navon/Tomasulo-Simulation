@@ -71,10 +71,9 @@ int main(int argc, char* argv[])
 		
 		Dispatch();
 
-		/*Execute();
+		Execute();
 
-		//write_back();
-		Broadcast();*/
+		Broadcast();
 
 		_cycles++;
 
