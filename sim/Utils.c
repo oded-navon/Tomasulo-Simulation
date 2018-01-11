@@ -74,3 +74,8 @@ void clear_all_ex_units()
 	}
 }
 
+void clear_rs_inst(RS* inst_to_clear)
+{
+	inst_to_clear->occupied = false;
+}
+

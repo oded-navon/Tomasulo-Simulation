@@ -1,5 +1,5 @@
 #include "Dispatch.h"
-
+#include "Utils.h"
 
 extern config_args* _config_args_read;
 extern RS rs_add[MAX_CONFIG_SIZE];
@@ -65,7 +65,9 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->src0 = inst_to_dispatch->src0;
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
-	unit_to_distpatch_to->dst_rs = inst_to_dispatch;
+	snprintf(unit_to_distpatch_to->rs_name, RS_NAME_LEN, inst_to_dispatch->name);
+	clear_rs_inst(inst_to_dispatch);
+
 }
 
 

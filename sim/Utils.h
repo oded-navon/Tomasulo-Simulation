@@ -94,7 +94,8 @@ typedef struct {
 	float src0;
 	float src1;
 	calc_unit_type calc_type;
-	RS* dst_rs;
+	//RS* dst_rs;
+	char rs_name[RS_NAME_LEN];
 }calc_unit;
 
 typedef struct queue_node {
@@ -142,3 +143,4 @@ void cleanup(cleanup_type clean_type);
 void init_regs();
 void init_rs_names_arrays();
 void clear_all_ex_units();
+void clear_rs_inst(RS* inst_to_clear);

@@ -37,16 +37,16 @@ void broadcast_result(calc_unit* unit_to_broadcast)
 	//Go over all the entries in the RAT table and handle the relevant entries, also insert the value to the regs table
 	for (int i = 0; i < NUM_OF_REGS; i++)
 	{
-		if(RAT[i].occupied && strcmp(RAT[i].rs, unit_to_broadcast->dst_rs->name) == 0)
+		if(RAT[i].occupied && strcmp(RAT[i].rs, unit_to_broadcast->rs_name) == 0)
 		{
 			RAT[i].occupied = false;
 			_regs[i] = operation_result;
 		}	
 	}
 	//Go over all of the reservation stations and replace the stations with the relevant tag with the real value
-	broadcast_to_rs(_config_args_read->add_nr_reservation, operation_result, rs_add, unit_to_broadcast->dst_rs->name);
-	broadcast_to_rs(_config_args_read->div_nr_reservation, operation_result, rs_div, unit_to_broadcast->dst_rs->name);
-	broadcast_to_rs(_config_args_read->mul_nr_reservation, operation_result, rs_mul, unit_to_broadcast->dst_rs->name);
+	broadcast_to_rs(_config_args_read->add_nr_reservation, operation_result, rs_add, unit_to_broadcast->rs_name);
+	broadcast_to_rs(_config_args_read->div_nr_reservation, operation_result, rs_div, unit_to_broadcast->rs_name);
+	broadcast_to_rs(_config_args_read->mul_nr_reservation, operation_result, rs_mul, unit_to_broadcast->rs_name);
 }
 
 float calculate_result(calc_unit* unit_to_broadcast)
@@ -64,10 +64,7 @@ float calculate_result(calc_unit* unit_to_broadcast)
 	}
 }
 
-void clear_rs_inst(RS* inst_to_clear)
-{
-	inst_to_clear->occupied = false;
-}
+
 
 void broadcast_to_rs(int num_of_rs_stations, float operation_result, RS* rs_stations, char* unit_to_broadcast_name)
 {
@@ -93,7 +90,6 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 		if (unit_to_broadcast[i].timer == CALC_UNIT_IS_READY)
 		{
 			broadcast_result(&unit_to_broadcast[i]);
-			clear_rs_inst(unit_to_broadcast[i].dst_rs);
 			unit_to_broadcast->timer = CALC_UNIT_IS_FREE;
 		}
 	}
