@@ -91,7 +91,11 @@ bool queue_has_single_item()
 
 inst* peek_queue_tail() 
 {
-	inst* res = _iq_arr->tail->node_inst;
+	inst* res = NULL;
+	if (!is_queue_empty())
+	{
+		res = _iq_arr->tail->node_inst;
+	}
 	return res;
 }
 

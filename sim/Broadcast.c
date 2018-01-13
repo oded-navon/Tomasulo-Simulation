@@ -8,6 +8,13 @@ extern calc_unit mul_units[MAX_CONFIG_SIZE];
 extern config_args* _config_args_read;
 extern load_buffer load_buffers[MAX_CONFIG_SIZE];
 extern store_buffer store_buffers[MAX_CONFIG_SIZE];
+extern bool received_halt_in_fetch; //means to stop do fetches
+extern bool finished_issue; //means to stop handle issues
+extern bool finished_dispatch; //means to stop dispatching
+extern bool finished_execute; //means to stop executing
+extern bool finished_broadcast; //means to stop broadcasting
+
+
 
 float _regs[NUM_OF_REGS];
 RAT_entry RAT[NUM_OF_REGS];
@@ -34,6 +41,13 @@ int translate_float_to_int_presentation_for_mem(float val);
 //Go over all of the calculation units and look for ready units
 void Broadcast()
 {
+	finished_broadcast = received_halt_in_fetch && finished_issue && finished_dispatch && finished_execute && finished_broadcast;
+	if(finished_broadcast)
+	{
+		printf("the program finished it's run. thank you and go fuck yourself");
+		exit(0);
+	}
+
 	broadcast_specific_calc_type(_config_args_read->mul_nr_units, mul_units);
 	broadcast_specific_calc_type(_config_args_read->div_nr_units, div_units);
 	broadcast_specific_calc_type(_config_args_read->add_nr_units, add_units);

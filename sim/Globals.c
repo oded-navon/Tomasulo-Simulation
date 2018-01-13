@@ -30,3 +30,12 @@ calc_unit mul_units[MAX_CONFIG_SIZE];
 
 load_buffer load_buffers[MAX_CONFIG_SIZE];
 store_buffer store_buffers[MAX_CONFIG_SIZE];
+
+//this set of booleans will help decide when the program will end completely
+bool received_halt_in_fetch; //means to stop do fetches
+bool finished_issue; //means to stop handle issues
+bool finished_execute; //means to stop executing
+bool finished_dispatch; //means to stop dispatching
+bool finished_broadcast; //means to stop broadcasting
+
+

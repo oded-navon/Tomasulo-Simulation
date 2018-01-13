@@ -62,7 +62,9 @@ typedef enum {
 typedef struct {
 	int dst;	//will contain index of dst reg
 	float src0;	 //will contain value of _regs[src0]
-	float src1;	 //will contain value of _regs[src1]
+	int src0_index;	 
+	float src1;		//will contain value of _regs[src1]
+	int src1_index;	 
 	char rs_waiting0[NAME_LEN];
 	char rs_waiting1[NAME_LEN];
 	inst_opcodes action_type;
@@ -83,8 +85,8 @@ typedef struct {
 typedef struct {
 	int opcode;
 	int imm;
-	int src0;
-	int src1;
+	int src0_index;
+	int src1_index;
 	int dst;
 } inst;
 
@@ -149,30 +151,12 @@ typedef struct {
 
 typedef struct {
 	int timer;
+	int src1_index;
 	float src1;
 	int imm;
 	char src1_waiting[NAME_LEN];
 	char buff_name[NAME_LEN];
 }store_buffer;
-
-#include <stdio.h>
-
-typedef union {
-	int bin_repr; //this is used to save the value of 
-	struct {
-		unsigned int mantisa : 23;
-		unsigned int exponent : 8;
-		unsigned int sign : 1;
-	} parts;
-} fp_repr;
-
-//int main(void) {
-//	float_cast d1 = { .f = 0.15625 };
-//	printf("sign = %x\n", d1.parts.sign);
-//	printf("exponent = %x\n", d1.parts.exponent);
-//	printf("mantisa = %x\n", d1.parts.mantisa);
-//}
-
 
 
 
