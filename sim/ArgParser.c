@@ -29,9 +29,6 @@ int parse_args(char* argv[])
 	//sim cfg.txt memin.txt memout.txt regout.txt traceinst.txt tracecdb.txt
 	char* config_file_path = argv[1];
 	char* memory_in_path = argv[2];
-	char* memory_out_path = argv[3];
-	char* reg_out_path = argv[4];
-	char* trace_inst_path = argv[5];
 	_trace_cdb_file_path = argv[6];
 
 	int return_value = SUCCESS;
@@ -69,8 +66,9 @@ int parse_args(char* argv[])
 			goto cleanup_on_fail;
 		}
 	}
-
 	_num_of_inst = convert_mem_to_inst(_memory_image_input, _instructions);
+	init_inst_ex_array();
+
 	goto ret;
 
 cleanup_on_fail:
@@ -84,10 +82,6 @@ int convert_mem_to_inst(int* memory_image, inst** output_insts)
 	int i;
 	for (i = 0; i < MAX_INST_NUM; i++)
 	{
-		//For tracing the instructions
-		output_insts[i]->inst_log->inst_code = memory_image[i];
-		output_insts[i]->inst_log->pc = i;
-
 		// Check first what is the opcode of the inst, in case it's a HALT inst
 		output_insts[i]->opcode = (memory_image[i] & inst_params_opcode) >> 24;
 		

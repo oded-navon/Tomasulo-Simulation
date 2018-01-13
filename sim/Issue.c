@@ -1,6 +1,8 @@
 #include "Issue.h"
 #include "Queue.h"
 
+#define IRRELEVANT (-1)
+
 extern RS rs_add[MAX_CONFIG_SIZE];
 extern RS rs_mul[MAX_CONFIG_SIZE];
 extern RS rs_div[MAX_CONFIG_SIZE]; 
@@ -25,7 +27,7 @@ bool issue_memory_instruction(inst* inst);
 int get_free_reservation_station_index(int opcode);
 int get_specific_free_reservation_station_index(RS rses[], int num_rses);
 int put_inst_in_RS(inst* instr);
-void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* instr);
+void put_inst_in_specific_rs(RS res_stations[], int free_station_index, inst* instr);
 void update_load_buffer(int index, inst* inst);
 void update_store_buffer(int index, inst* inst);
 int check_available_load_buffer();
@@ -53,6 +55,11 @@ bool issue_instruction()
 	if (instr == NULL)
 	{
 		return false; //will happen when queue is empty
+	}
+	if (instr->opcode == HALT_opcode)
+	{
+		finished_issue = true;
+		return false;
 	}
 	int issued_successfully = NO_INSTANCE_AVAILABLE;
 	if (instr->opcode == LD_opcode || instr->opcode == ST_opcode)
@@ -160,6 +167,8 @@ void update_store_buffer(int index, inst* inst)
 	store_buffers[index].timer = _config_args_read->mem_delay;
 	store_buffers[index].curr_inst = inst;
 	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
+	store_buffers[index].curr_inst->inst_log->write_cdb = IRRELEVANT;
+
 }
 
 int get_free_reservation_station_index(int opcode)
@@ -245,7 +254,7 @@ int put_inst_in_RS(inst* instr)
 	return SUCCESS;
 }
 
-void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* instr)
+void put_inst_in_specific_rs(RS res_stations[], int free_station_index, inst* instr)
 {
 	res_stations[free_station_index].occupied = true;
 	res_stations[free_station_index].dst = instr->dst;

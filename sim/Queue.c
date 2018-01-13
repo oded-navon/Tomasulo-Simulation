@@ -55,7 +55,6 @@ void dequeue()
 	if (queue_has_single_item())
 	{
 		_iq_arr->tail = NULL;
-		free(_iq_arr->head->node_inst);
 		free(_iq_arr->head);
 		_iq_arr->head = NULL;
 		_iq_arr->num_items_in_queue = 0;
@@ -69,7 +68,6 @@ void dequeue()
 	//Make the item before the tail, the new tail
 	_iq_arr->tail = _iq_arr->tail->prev;
 	//Free the deleted item resources
-	free(tail_to_delete->node_inst);
 	free(tail_to_delete);
 	_iq_arr->num_items_in_queue--;
 }

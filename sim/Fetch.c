@@ -16,7 +16,6 @@ void fetch_instruction()
 		if (_instructions[_current_inst_in_instructions]->opcode == HALT_opcode)
 		{
 			received_halt_in_fetch = true;
-			return;
 		}
 		enqueue(_instructions[_current_inst_in_instructions]);
 		_current_inst_in_instructions++;

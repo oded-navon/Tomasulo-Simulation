@@ -9,6 +9,27 @@ extern unsigned int _cycles;
 extern int _num_of_inst;
 extern int _num_of_cdb;
 
+bool write_memory_output(char* memout_file);
+bool write_reg_output(char* regout_file);
+bool write_inst_output(char * traceinst_file);
+
+bool write_outputs(char * memout_file, char * regout_file, char * traceinst_file)
+{
+	if (!write_memory_output(memout_file))
+	{
+		return false;
+	}
+	if (!write_reg_output(regout_file))
+	{
+		return false;
+	}
+	if (!write_inst_output(traceinst_file))
+	{
+		return false;
+	}
+	return true;
+}
+
 bool write_memory_output(char * memout_file)
 {
 	bool return_value = true;
@@ -97,47 +118,6 @@ bool write_inst_output(char * traceinst_file)
 	fclose(file);
 	return return_value;
 }
-
-/*bool write_cdb_output(char * tracecdb_file)
-{
-	bool return_value = true;
-	FILE* file = fopen(tracecdb_file, "w");
-	if (file == NULL)
-	{
-		return false;
-	}
-
-	int check_ret = 0;
-	for (int i = 0; i < _cycles * _num_of_cdb; i++)
-	{
-		char line_to_print[MAX_LINE_LEN];
-		CDB_ex* output_cdb = _instructions[i]->cdb_log;
-
-		check_ret = sprintf(line_to_print,
-			"%d %d %s %f %s\n",
-			output_cdb->cycle,
-			output_cdb->pc,
-			output_cdb->cdb_name,
-			output_cdb->data,
-			output_cdb->tag
-		);
-
-		if (check_ret < 0)
-		{
-			return_value = false;
-			break;
-		}
-
-		check_ret = fprintf(file, line_to_print);
-		if (check_ret < 0)
-		{
-			return_value = false;
-			break;
-		}
-	}
-	fclose(file);
-	return return_value;
-}*/
 
 void write_cdb_trace_to_file(int cycle, int inst_pc, inst_opcodes unit_type, float data, char* tag)
 {

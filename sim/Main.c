@@ -8,6 +8,7 @@
 #include "Execute.h"
 #include "Broadcast.h"
 #include "Globals.c"
+#include "Tracer.h"
 
 extern int _last_unoccupied_index_in_iq;
 extern unsigned int _cycles;
@@ -40,6 +41,12 @@ extern calc_unit add_units[MAX_CONFIG_SIZE]; //TODO: look into starvation
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
 
+//for finishing execution
+extern bool received_halt_in_fetch; //means to stop do fetches
+extern bool finished_issue; //means to stop handle issues
+extern bool finished_execute; //means to stop executing
+extern bool finished_dispatch; //means to stop dispatching
+extern bool finished_broadcast; //means to stop broadcasting
 
 int main(int argc, char* argv[])
 {
@@ -61,8 +68,8 @@ int main(int argc, char* argv[])
 	_cycles = 0;
 	
 	//order of operations is reversed to simulate concurrency of all of them
-	//while (instr_proc < instr_count) {
-	while (true){ //_current_inst_in_instructions <= _num_of_inst) {
+	while (!(received_halt_in_fetch && finished_issue && finished_execute && finished_dispatch && finished_broadcast))
+	{ 
 		Broadcast();
 		Execute();
 		Dispatch();
@@ -70,6 +77,14 @@ int main(int argc, char* argv[])
 		Fetch();
 		_cycles++;
 
+	}
+	char* memory_out_path = argv[3];
+	char* reg_out_path = argv[4];
+	char* trace_inst_path = argv[5];
+
+	if (!write_outputs(memory_out_path, reg_out_path, trace_inst_path))
+	{
+		return_value = FAIL;
 	}
 
 	cleanup(cleanup_inst_and_config);

@@ -32,8 +32,8 @@ void broadcast_result(char* rs_or_buff_name, float value);
 float calculate_result(calc_unit* unit_to_broadcast);
 void clear_rs_inst(RS* inst_to_clear);
 void broadcast_to_rs(int num_of_rs_stations, float operation_result, RS* rs_stations, char* unit_to_broadcast_name);
-void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broadcast);
-void broadcast_memory();
+bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broadcast);
+bool broadcast_memory();
 float load_from_address(load_buffer* buff);
 float store_at_address(store_buffer* buff);
 void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_result);
@@ -47,13 +47,13 @@ void Broadcast()
 	if(finished_broadcast)
 	{
 		printf("the program finished it's run. thank you and go fuck yourself");
-		exit(0);
+		return;
 	}
+	finished_broadcast = broadcast_specific_calc_type(_config_args_read->mul_nr_units, mul_units);
+	finished_broadcast = broadcast_specific_calc_type(_config_args_read->div_nr_units, div_units) && finished_broadcast;
+	finished_broadcast = broadcast_specific_calc_type(_config_args_read->add_nr_units, add_units) && finished_broadcast;
+	finished_broadcast = broadcast_memory() && finished_broadcast;
 
-	broadcast_specific_calc_type(_config_args_read->mul_nr_units, mul_units);
-	broadcast_specific_calc_type(_config_args_read->div_nr_units, div_units);
-	broadcast_specific_calc_type(_config_args_read->add_nr_units, add_units);
-	broadcast_memory();
 }
 
 //Broadcast goes over the RAT and the reservation stations and looks for the relevant tag
@@ -119,8 +119,9 @@ void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_re
 	}
 }
 
-void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broadcast)
+bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broadcast)
 {
+	bool all_units_are_free = true;
 	for (int i = 0; i < num_of_calc_units; i++)
 	{
 		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)
@@ -132,10 +133,12 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 			write_cdb_trace_to_file(_cycles, unit_to_broadcast->curr_inst->inst_log->pc, unit_to_broadcast->curr_inst->opcode, operation_result, unit_to_broadcast->curr_inst->inst_log->tag);
 			//This 'break' causes the CDB to only take 1 value in each cycle. We find the first unit which is ready and broadcast
 			//its result, and then break. So only the first ready unit is broadcasted in effect.
+			all_units_are_free = false;
 			break;
 			//set_cdb_occupied(unit_to_broadcast->calc_type);
 		}
 	}
+	return all_units_are_free;
 }
 
 /*void set_cdb_occupied(calc_unit_type unit_type)
@@ -177,17 +180,19 @@ void reset_cdb()
 	_cdb_free->mem_cdb_is_free = true;
 }*/
 
-void broadcast_memory()
+bool broadcast_memory()
 {
+	bool all_units_are_free = true;
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
 		if (load_buffers[i].timer == INSTANCE_IS_READY)
 		{
+			all_units_are_free = false;
 			float mem_result = load_from_address(&load_buffers[i]);
 			broadcast_result(load_buffers[i].buff_name, mem_result);
 			load_buffers[i].timer = INSTANCE_IS_FREE;
 			write_cdb_trace_to_file(_cycles, load_buffers[i].curr_inst->inst_log->pc , load_buffers[i].curr_inst->opcode, mem_result, load_buffers[i].curr_inst->inst_log->tag);
-			break;
+			return all_units_are_free;
 		}
 	}
 
@@ -195,10 +200,11 @@ void broadcast_memory()
 	{
 		if (store_buffers[i].timer == INSTANCE_IS_READY)
 		{
+			all_units_are_free = false;
 			float mem_result = store_at_address(&load_buffers[i]);
 			//broadcast_result(load_buffers[i].buff_name, mem_result);
 			store_buffers[i].timer = INSTANCE_IS_FREE;
-			break;
+			return all_units_are_free;
 		}
 	}
 }

@@ -1,6 +1,5 @@
 #include "Utils.h"
 
-#define IRRELEVANT (-1)
 
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern config_args* _config_args_read;
@@ -30,6 +29,7 @@ void cleanup(cleanup_type clean_type)
 	case cleanup_inst_and_config:
 		for (int i = 0; i < MAX_INST_NUM; i++)
 		{
+			free(_instructions[i]->inst_log);
 			free(_instructions[i]);
 		}
 		for (int i = 0; i < _num_of_inst; i++)
@@ -78,7 +78,6 @@ void init_buff_names_arrays()
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
 		snprintf(store_buffers[i].buff_name, NAME_LEN, "STORE%d", i);
-		store_buffers[i].curr_inst->inst_log->write_cdb = IRRELEVANT;
 	}
 }
 
@@ -87,6 +86,9 @@ void init_inst_ex_array()
 	for (int i = 0; i < _num_of_inst; i++)
 	{
 		_instructions[i]->inst_log = malloc(sizeof(inst_ex));
+		//For tracing the instructions
+		_instructions[i]->inst_log->inst_code = _memory_image_input[i];
+		_instructions[i]->inst_log->pc = i;
 	}
 }
 
