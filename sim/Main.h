@@ -7,5 +7,3 @@
 #include "Utils.h"
 
 
-
-int parse_args(char* argv[]);

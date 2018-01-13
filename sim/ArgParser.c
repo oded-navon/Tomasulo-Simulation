@@ -7,7 +7,7 @@
 
 bool parse_config_file_line(char* line, config_args* output_config_args);
 bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_val);
-bool parse_cdb_file_line(char* line, CDB* output_cdb);
+bool parse_cdb_file_line(char* line, CDB_ex* output_cdb);
 bool parse_memin_file_line(char* line, int* memory_word);
 bool parse_inst_file_line(char* line, inst_ex* output_inst_arg);
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
@@ -21,6 +21,7 @@ extern config_args* _config_args_read;
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern inst* _instructions[MAX_INST_NUM];
 extern int _num_of_inst;
+extern char* _trace_cdb_file_path;
 
 int parse_args(char* argv[])
 {
@@ -31,7 +32,7 @@ int parse_args(char* argv[])
 	char* memory_out_path = argv[3];
 	char* reg_out_path = argv[4];
 	char* trace_inst_path = argv[5];
-	char* trace_cdb_path = argv[6];
+	_trace_cdb_file_path = argv[6];
 
 	int return_value = SUCCESS;
 	cleanup_type cleanup_ret = cleanup_config;
@@ -41,21 +42,21 @@ int parse_args(char* argv[])
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
-		goto cleanup_fail;
+		goto cleanup_on_fail;
 	}
 
 	if (!parse_file(config_file_path, config_parse, &_config_args_read))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
-		goto cleanup_fail;
+		goto cleanup_on_fail;
 	}
 
 	if (!parse_file(memory_in_path, memin_parse, &_memory_image_input))
 	{
 		return_value = FAIL;
 		cleanup_ret = cleanup_config;
-		goto cleanup_fail;
+		goto cleanup_on_fail;
 	}
 
 	for (int i = 0; i < MAX_INST_NUM; i++)
@@ -65,27 +66,28 @@ int parse_args(char* argv[])
 		{
 			return_value = FAIL;
 			cleanup_ret = cleanup_inst_and_config;
-			goto cleanup_fail;
+			goto cleanup_on_fail;
 		}
 	}
 
 	_num_of_inst = convert_mem_to_inst(_memory_image_input, _instructions);
 	goto ret;
 
-cleanup_fail:
+cleanup_on_fail:
 	cleanup(cleanup_ret);
 ret:
 	return return_value;
 }
-
-
-
 
 int convert_mem_to_inst(int* memory_image, inst** output_insts)
 {
 	int i;
 	for (i = 0; i < MAX_INST_NUM; i++)
 	{
+		//For tracing the instructions
+		output_insts[i]->inst_log->inst_code = memory_image[i];
+		output_insts[i]->inst_log->pc = i;
+
 		// Check first what is the opcode of the inst, in case it's a HALT inst
 		output_insts[i]->opcode = (memory_image[i] & inst_params_opcode) >> 24;
 		
@@ -101,7 +103,7 @@ int convert_mem_to_inst(int* memory_image, inst** output_insts)
 		output_insts[i]->dst = (memory_image[i] & inst_params_dst) >> 20;
 	}
 
-	// return the number of instructions found
+	// return the number of instructions found including HALT
 	return i+1;
 }
 
@@ -250,7 +252,7 @@ double parse_double_number(char* double_number)
 
 
 // TODO: redundant code for input parsing, but useful for writing the output files
-bool parse_cdb_file_line(char* line, CDB* output_cdb)
+bool parse_cdb_file_line(char* line, CDB_ex* output_cdb)
 {
 	char* token = strtok(line, " ");
 	if (token == NULL)

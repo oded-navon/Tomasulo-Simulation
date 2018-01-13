@@ -16,10 +16,6 @@ extern int _num_of_cdb;
 extern int _current_inst_in_instructions;
 extern inst_queue* _iq_arr;
 
-//for logging the run
-extern inst_ex* _instructions_executed[MAX_INST_NUM];
-extern CDB** _cdb;
-
 //for input
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern config_args* _config_args_read;

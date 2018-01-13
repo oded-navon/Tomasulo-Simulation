@@ -8,9 +8,10 @@
 #define MAX_ITEMS (16)
 #define TAG_LEN (10)
 #define NUM_OF_REGS (16)
+#define MAX_LINE_LEN (128)
 
 #define TAG_LEN (10)
-#define CDB_NAME_LEN (5)
+#define CDB_NAME_LEN (10)
 #define MEMORY_IMAGE_INPUT_SIZE (4096)
 #define SUCCESS (0)
 #define FAIL (-1)
@@ -60,15 +61,23 @@ typedef enum {
 
 
 typedef struct {
-	int dst;	//will contain index of dst reg
-	float src0;	 //will contain value of _regs[src0]
-	float src1;	 //will contain value of _regs[src1]
-	char rs_waiting0[NAME_LEN];
-	char rs_waiting1[NAME_LEN];
-	inst_opcodes action_type;
-	bool occupied;
-	char name[NAME_LEN];
-}RS;
+	bool add_cdb_is_free;
+	bool mul_cdb_is_free;
+	bool div_cdb_is_free;
+	bool mem_cdb_is_free;
+}cdb_free;
+
+typedef struct {
+	int inst_code;
+	int pc;
+	char tag[TAG_LEN];
+	int cycle_issued;
+	int cycle_ex_start;
+	int cycle_ex_end;
+	int cycle_write_cdb;
+	char cdb_name[CDB_NAME_LEN];
+	float data;
+}trace;
 
 typedef struct {
 	int inst_code;
@@ -81,12 +90,33 @@ typedef struct {
 }inst_ex;
 
 typedef struct {
+	int cycle;
+	int pc;
+	char cdb_name[CDB_NAME_LEN];
+	float data;
+	char tag[TAG_LEN];
+}CDB_ex;
+
+typedef struct {
 	int opcode;
 	int imm;
 	int src0;
 	int src1;
 	int dst;
+	inst_ex* inst_log;
 } inst;
+
+typedef struct {
+	int dst;	//will contain index of dst reg
+	float src0;	 //will contain value of _regs[src0]
+	float src1;	 //will contain value of _regs[src1]
+	char rs_waiting0[NAME_LEN];
+	char rs_waiting1[NAME_LEN];
+	inst_opcodes action_type;
+	bool occupied;
+	char name[NAME_LEN];
+	inst* curr_inst;
+}RS;
 
 typedef struct {
 	int timer;
@@ -94,7 +124,7 @@ typedef struct {
 	float src1;	//will contain value of _reg[src1]
 	int dst;	//will contain index of dst reg
 	calc_unit_type calc_type;
-	//RS* dst_rs;
+	inst* curr_inst;
 	char rs_name[NAME_LEN];
 }calc_unit;
 
@@ -127,24 +157,16 @@ typedef struct {
 }config_args;
 
 typedef struct {
-	int cycle;
-	int pc;
-	char cdb_name[CDB_NAME_LEN];
-	double data;
-	char tag[TAG_LEN];
-}CDB;
-
-typedef struct {
 	bool occupied;
 	char rs_or_buff_name[NAME_LEN];
 }RAT_entry;
-
 
 typedef struct {
 	int timer;
 	int dst;
 	int imm;
 	char buff_name[NAME_LEN];
+	inst* curr_inst;
 }load_buffer;
 
 typedef struct {
@@ -153,9 +175,9 @@ typedef struct {
 	int imm;
 	char src1_waiting[NAME_LEN];
 	char buff_name[NAME_LEN];
+	inst* curr_inst;
 }store_buffer;
 
-#include <stdio.h>
 
 typedef union {
 	int bin_repr; //this is used to save the value of 
@@ -180,6 +202,7 @@ void cleanup(cleanup_type clean_type);
 void init_regs();
 void init_rs_names_arrays();
 void init_buff_names_arrays();
+void init_inst_ex_array();
 void clear_all_ex_units();
 void clear_all_buffers();
 void clear_rs_inst(RS* inst_to_clear);

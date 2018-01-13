@@ -1,9 +1,12 @@
 #include "Utils.h"
 
+#define IRRELEVANT (-1)
+
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern config_args* _config_args_read;
 extern inst* _instructions[MAX_INST_NUM];
 extern float _regs[NUM_OF_REGS];
+extern int _num_of_inst;
 
 extern char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
 extern char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
@@ -29,6 +32,10 @@ void cleanup(cleanup_type clean_type)
 		{
 			free(_instructions[i]);
 		}
+		for (int i = 0; i < _num_of_inst; i++)
+		{
+			free(_instructions[i]->inst_log);
+		}
 	case cleanup_config:
 		free(_config_args_read);
 	}
@@ -44,7 +51,7 @@ void init_regs()
 
 void init_rs_names_arrays()
 {
-	for (int i = 0; i < _config_args_read->add_nr_reservation ; i++)
+	for (int i = 0; i < _config_args_read->add_nr_reservation; i++)
 	{
 		snprintf(rs_add[i].name, NAME_LEN, "ADD%d", i);
 	}
@@ -53,7 +60,7 @@ void init_rs_names_arrays()
 	{
 		snprintf(rs_div[i].name, NAME_LEN, "DIV%d", i);
 	}
-	
+
 	for (int i = 0; i < _config_args_read->mul_nr_reservation; i++)
 	{
 		snprintf(rs_mul[i].name, NAME_LEN, "MUL%d", i);
@@ -71,6 +78,15 @@ void init_buff_names_arrays()
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
 		snprintf(store_buffers[i].buff_name, NAME_LEN, "STORE%d", i);
+		store_buffers[i].curr_inst->inst_log->write_cdb = IRRELEVANT;
+	}
+}
+
+void init_inst_ex_array()
+{
+	for (int i = 0; i < _num_of_inst; i++)
+	{
+		_instructions[i]->inst_log = malloc(sizeof(inst_ex));
 	}
 }
 
