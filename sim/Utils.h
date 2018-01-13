@@ -67,17 +67,6 @@ typedef struct {
 	bool mem_cdb_is_free;
 }cdb_free;
 
-typedef struct {
-	int inst_code;
-	int pc;
-	char tag[TAG_LEN];
-	int cycle_issued;
-	int cycle_ex_start;
-	int cycle_ex_end;
-	int cycle_write_cdb;
-	char cdb_name[CDB_NAME_LEN];
-	float data;
-}trace;
 
 typedef struct {
 	int inst_code;
@@ -100,8 +89,8 @@ typedef struct {
 typedef struct {
 	int opcode;
 	int imm;
-	int src0;
-	int src1;
+	int src0_index;
+	int src1_index;
 	int dst;
 	inst_ex* inst_log;
 } inst;
@@ -171,30 +160,13 @@ typedef struct {
 
 typedef struct {
 	int timer;
+	int src1_index;
 	float src1;
 	int imm;
 	char src1_waiting[NAME_LEN];
 	char buff_name[NAME_LEN];
 	inst* curr_inst;
 }store_buffer;
-
-
-typedef union {
-	int bin_repr; //this is used to save the value of 
-	struct {
-		unsigned int mantisa : 23;
-		unsigned int exponent : 8;
-		unsigned int sign : 1;
-	} parts;
-} fp_repr;
-
-//int main(void) {
-//	float_cast d1 = { .f = 0.15625 };
-//	printf("sign = %x\n", d1.parts.sign);
-//	printf("exponent = %x\n", d1.parts.exponent);
-//	printf("mantisa = %x\n", d1.parts.mantisa);
-//}
-
 
 
 

@@ -9,17 +9,57 @@ extern calc_unit add_units[MAX_CONFIG_SIZE];
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
 extern unsigned int _cycles;
+extern bool received_halt_in_fetch; //means to stop do fetches
+extern bool finished_issue; //means to stop handle issues
+extern bool finished_dispatch; //means to stop dispatching
 
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
 bool is_rs_inst_ready(RS* inst);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
-
+bool check_if_at_least_one_reservation_station_is_occupied();
 void Dispatch()
 {
+	finished_dispatch = received_halt_in_fetch && finished_issue && (finished_dispatch || check_if_at_least_one_reservation_station_is_occupied());
+	if (finished_dispatch)
+	{
+		return;
+	}
+
 	//dispatch instructions for every unit type
 	find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD_calc_unit);
 	find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV_calc_unit);
 	find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL_calc_unit);
+	;
+
+}
+
+bool check_if_at_least_one_reservation_station_is_occupied()
+{
+	for (int j = 0; j < _config_args_read->add_nr_reservation; j++)
+	{
+		if (rs_add[j].occupied)
+		{
+			return true;
+		}
+	}
+
+	for (int j = 0; j < _config_args_read->mul_nr_reservation; j++)
+	{
+		if (rs_mul[j].occupied)
+		{
+			return true;
+		}
+	}
+
+	for (int j = 0; j < _config_args_read->div_nr_reservation; j++)
+	{
+		if (rs_div[j].occupied)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 //go over all the units to find which are free

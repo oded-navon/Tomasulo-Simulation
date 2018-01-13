@@ -16,6 +16,8 @@ extern unsigned int _cycles;
 extern load_buffer load_buffers[MAX_CONFIG_SIZE];
 extern store_buffer store_buffers[MAX_CONFIG_SIZE];
 extern bool used_memory_port_in_current_cycle;
+extern bool received_halt_in_fetch; //means to stop do fetches
+extern bool finished_issue; //means to stop handle issues
 
 
 bool issue_instruction();
@@ -32,6 +34,11 @@ int check_available_store_buffer();
 void Issue()
 {
 	used_memory_port_in_current_cycle = false;
+	if (received_halt_in_fetch && finished_issue)
+	{
+		return;
+	}
+
 	// try to issue an instruction
 	if (issue_instruction())
 	{
@@ -43,7 +50,11 @@ void Issue()
 bool issue_instruction()
 {
 	inst* instr = peek_queue_tail();
-	int issued_successfully;
+	if (instr == NULL)
+	{
+		return false; //will happen when queue is empty
+	}
+	int issued_successfully = NO_INSTANCE_AVAILABLE;
 	if (instr->opcode == LD_opcode || instr->opcode == ST_opcode)
 	{
 		if(!used_memory_port_in_current_cycle)
@@ -101,7 +112,7 @@ int check_available_load_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (!load_buffers[i].timer == INSTANCE_IS_FREE)
+		if (load_buffers[i].timer == INSTANCE_IS_FREE)
 		{
 			return i;
 		}
@@ -113,7 +124,7 @@ int check_available_store_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (!store_buffers[i].timer == INSTANCE_IS_FREE)
+		if (store_buffers[i].timer == INSTANCE_IS_FREE)
 		{
 			return i;
 		}
@@ -126,6 +137,9 @@ void update_load_buffer(int index, inst* inst)
 	load_buffers[index].dst = inst->dst;
 	load_buffers[index].imm = inst->imm;
 	load_buffers[index].timer = _config_args_read->mem_delay;
+	memset(RAT[inst->dst].rs_or_buff_name, 0, NAME_LEN);
+	RAT[inst->dst].occupied = true;
+	snprintf(RAT[inst->dst].rs_or_buff_name, NAME_LEN, "%s", load_buffers[index].buff_name);
 	load_buffers[index].curr_inst = inst;
 	load_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 }
@@ -134,13 +148,13 @@ void update_store_buffer(int index, inst* inst)
 {
 	//in case we need to wait 
 	memset(store_buffers[index].src1_waiting, 0, NAME_LEN);
-	if (RAT[inst->src1].occupied)
+	if (RAT[inst->src1_index].occupied)
 	{
-		snprintf(store_buffers[index].src1_waiting, NAME_LEN, "%s", RAT[inst->src1].rs_or_buff_name);
+		snprintf(store_buffers[index].src1_waiting, NAME_LEN, "%s", RAT[inst->src1_index].rs_or_buff_name);
 	}
 	else
 	{
-		store_buffers[index].src1 = _regs[inst->src1];
+		store_buffers[index].src1 = _regs[inst->src1_index];
 	}
 	store_buffers[index].imm = inst->imm;
 	store_buffers[index].timer = _config_args_read->mem_delay;
@@ -222,6 +236,7 @@ int put_inst_in_RS(inst* instr)
 			break;
 
 		case HALT_opcode:
+			finished_issue = true;
 			break;
 
 		default:
@@ -238,24 +253,27 @@ void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* ins
 
 	//check if the registers are wait for values in RAT or they are ready
 	memset(res_stations[free_station_index].rs_waiting0, 0, NAME_LEN);
-	if (RAT[instr->src0].occupied)
+	if (RAT[instr->src0_index].occupied)
 	{
-		snprintf(res_stations[free_station_index].rs_waiting0, NAME_LEN, "%s", RAT[instr->src0].rs_or_buff_name);
+		snprintf(res_stations[free_station_index].rs_waiting0, NAME_LEN, "%s", RAT[instr->src0_index].rs_or_buff_name);
 	}
 	else
 	{
-		res_stations[free_station_index].src0 = _regs[instr->src0];
+		res_stations[free_station_index].src0_index = _regs[instr->src0_index];
 	}
 
 	memset(res_stations[free_station_index].rs_waiting1, 0, NAME_LEN);
-	if (RAT[instr->src1].occupied)
+	if (RAT[instr->src1_index].occupied)
 	{
-		snprintf(res_stations[free_station_index].rs_waiting1, NAME_LEN, "%s", RAT[instr->src1].rs_or_buff_name);
+		snprintf(res_stations[free_station_index].rs_waiting1, NAME_LEN, "%s", RAT[instr->src1_index].rs_or_buff_name);
 	}
 	else
 	{
-		res_stations[free_station_index].src1 = _regs[instr->src1];
+		res_stations[free_station_index].src1 = _regs[instr->src1_index];
 	}
 	res_stations[free_station_index].curr_inst = instr;
 	res_stations[free_station_index].curr_inst->inst_log->cycle_issued = _cycles;
+	memset(RAT[instr->dst].rs_or_buff_name, 0, NAME_LEN);
+	snprintf(RAT[instr->dst].rs_or_buff_name, NAME_LEN, "%s", res_stations[free_station_index].name);
+	RAT[instr->dst].occupied = true;
 }

@@ -12,6 +12,11 @@ extern store_buffer store_buffers[MAX_CONFIG_SIZE];
 extern cdb_free* _cdb_free;
 extern unsigned int _cycles;
 extern char* _trace_cdb_file_path;
+extern bool received_halt_in_fetch; //means to stop do fetches
+extern bool finished_issue; //means to stop handle issues
+extern bool finished_dispatch; //means to stop dispatching
+extern bool finished_execute; //means to stop executing
+extern bool finished_broadcast; //means to stop broadcasting
 
 float _regs[NUM_OF_REGS];
 RAT_entry RAT[NUM_OF_REGS];
@@ -32,13 +37,19 @@ void broadcast_memory();
 float load_from_address(load_buffer* buff);
 float store_at_address(store_buffer* buff);
 void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_result);
-float translate_bits_to_single_precision(int mem_value_as_int);
-float translate_float_to_single_precision(float val);
+float translate_int_to_float_presentation_for_mem(int mem_value_as_int);
+int translate_float_to_int_presentation_for_mem(float val);
 
 //Go over all of the calculation units and look for ready units
 void Broadcast()
 {
-	//reset_cdb();
+	finished_broadcast = received_halt_in_fetch && finished_issue && finished_dispatch && finished_execute && finished_broadcast;
+	if(finished_broadcast)
+	{
+		printf("the program finished it's run. thank you and go fuck yourself");
+		exit(0);
+	}
+
 	broadcast_specific_calc_type(_config_args_read->mul_nr_units, mul_units);
 	broadcast_specific_calc_type(_config_args_read->div_nr_units, div_units);
 	broadcast_specific_calc_type(_config_args_read->add_nr_units, add_units);
@@ -112,7 +123,7 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 {
 	for (int i = 0; i < num_of_calc_units; i++)
 	{
-		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)// && cdb_is_free(unit_to_broadcast->calc_type))
+		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)
 		{
 			float operation_result = calculate_result(unit_to_broadcast);
 			broadcast_result(unit_to_broadcast->rs_name, operation_result);
@@ -194,24 +205,26 @@ void broadcast_memory()
 
 float load_from_address(load_buffer* buff)
 {
-	_regs[buff->dst] = translate_bits_to_single_precision(_memory_image_input[buff->imm]);
+	_regs[buff->dst] = translate_int_to_float_presentation_for_mem(_memory_image_input[buff->imm]);
 	return _regs[buff->dst];
 }
 
 float store_at_address(store_buffer* buff)
 {
-	_memory_image_input[buff->imm] = translate_float_to_single_precision(buff->src1);
+	_memory_image_input[buff->imm] = translate_float_to_int_presentation_for_mem(buff->src1);
 	return buff->src1;
 }
 
-float translate_bits_to_single_precision(int mem_value_as_int)
+float translate_int_to_float_presentation_for_mem(int mem_value_as_int)
 {
-	fp_repr fp = { .bin_repr = mem_value_as_int };
-	return 1.0;
+	void* void_cast = (void*) &mem_value_as_int;
+	float* res = (float*)void_cast;
+	return *res;
 }
 
-float translate_float_to_single_precision(float val)
+int translate_float_to_int_presentation_for_mem(float val)
 {
-	fp_repr fp = { .bin_repr = val };
-	return 1.0;
+	void* void_cast = (void*) &val;
+	int* res = (int*)void_cast;
+	return *res;
 }

@@ -98,8 +98,8 @@ int convert_mem_to_inst(int* memory_image, inst** output_insts)
 		}
 		
 		output_insts[i]->imm = memory_image[i] & inst_params_imm;
-		output_insts[i]->src1 = (memory_image[i] & inst_params_src1) >> 12;
-		output_insts[i]->src0 = (memory_image[i] & inst_params_src0) >> 16;
+		output_insts[i]->src1_index = (memory_image[i] & inst_params_src1) >> 12;
+		output_insts[i]->src0_index = (memory_image[i] & inst_params_src0) >> 16;
 		output_insts[i]->dst = (memory_image[i] & inst_params_dst) >> 20;
 	}
 
