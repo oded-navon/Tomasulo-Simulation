@@ -8,10 +8,10 @@ extern RS rs_div[MAX_CONFIG_SIZE];
 extern calc_unit add_units[MAX_CONFIG_SIZE]; 
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
+extern unsigned int _cycles;
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 extern bool finished_dispatch; //means to stop dispatching
-
 
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
 bool is_rs_inst_ready(RS* inst);
@@ -106,8 +106,10 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
 	snprintf(unit_to_distpatch_to->rs_name, NAME_LEN, inst_to_dispatch->name);
+	unit_to_distpatch_to->curr_inst = inst_to_dispatch->curr_inst;
+	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
+	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
 	clear_rs_inst(inst_to_dispatch);
-
 }
 
 

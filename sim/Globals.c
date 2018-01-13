@@ -1,19 +1,19 @@
 #include "Utils.h"
 
 bool used_memory_port_in_current_cycle;
-int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
-inst_ex* _instructions_executed[MAX_INST_NUM];
 config_args* _config_args_read;
 int _last_unoccupied_index_in_iq;
 inst* _instructions[MAX_INST_NUM];
 int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
-CDB** _cdb;
+CDB_ex** _cdb;
 unsigned int _cycles;
 int _num_of_inst;
 int _num_of_cdb;
 int _current_inst_in_instructions;
 inst_queue* _iq_arr;
 float _regs[NUM_OF_REGS];
+cdb_free* _cdb_free;
+char* _trace_cdb_file_path;
 
 RAT_entry RAT[NUM_OF_REGS];
 RS rs_add[MAX_CONFIG_SIZE];

@@ -1,5 +1,6 @@
 #include "Broadcast.h"
 #include "Utils.h"
+#include "Tracer.h"
 
 extern int _memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 extern calc_unit add_units[MAX_CONFIG_SIZE];
@@ -8,13 +9,14 @@ extern calc_unit mul_units[MAX_CONFIG_SIZE];
 extern config_args* _config_args_read;
 extern load_buffer load_buffers[MAX_CONFIG_SIZE];
 extern store_buffer store_buffers[MAX_CONFIG_SIZE];
+extern cdb_free* _cdb_free;
+extern unsigned int _cycles;
+extern char* _trace_cdb_file_path;
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 extern bool finished_dispatch; //means to stop dispatching
 extern bool finished_execute; //means to stop executing
 extern bool finished_broadcast; //means to stop broadcasting
-
-
 
 float _regs[NUM_OF_REGS];
 RAT_entry RAT[NUM_OF_REGS];
@@ -88,8 +90,6 @@ float calculate_result(calc_unit* unit_to_broadcast)
 	}
 }
 
-
-
 void broadcast_to_rs(int num_of_rs_stations, float operation_result, RS* rs_stations, char* unit_to_broadcast_name)
 {
 	for (int i = 0; i < num_of_rs_stations; i++)
@@ -128,9 +128,55 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 			float operation_result = calculate_result(unit_to_broadcast);
 			broadcast_result(unit_to_broadcast->rs_name, operation_result);
 			unit_to_broadcast[i].timer = INSTANCE_IS_FREE;
+			unit_to_broadcast->curr_inst->inst_log->write_cdb = _cycles;
+			write_cdb_trace_to_file(_cycles, unit_to_broadcast->curr_inst->inst_log->pc, unit_to_broadcast->curr_inst->opcode, operation_result, unit_to_broadcast->curr_inst->inst_log->tag);
+			//This 'break' causes the CDB to only take 1 value in each cycle. We find the first unit which is ready and broadcast
+			//its result, and then break. So only the first ready unit is broadcasted in effect.
+			break;
+			//set_cdb_occupied(unit_to_broadcast->calc_type);
 		}
 	}
 }
+
+/*void set_cdb_occupied(calc_unit_type unit_type)
+{
+	switch (unit_type)
+	{
+	case ADD_calc_unit:
+		_cdb_free->add_cdb_is_free = false;
+		break;
+	case DIV_calc_unit:
+		_cdb_free->div_cdb_is_free = false;
+		break;
+	case MUL_calc_unit:
+		_cdb_free->mul_cdb_is_free = false;
+		break;
+	}
+}
+
+bool cdb_is_free(calc_unit_type unit_type)
+{
+	switch (unit_type)
+	{
+		case ADD_calc_unit:
+			return _cdb_free->add_cdb_is_free;
+		case DIV_calc_unit:
+			return _cdb_free->div_cdb_is_free;
+		case MUL_calc_unit:
+			return _cdb_free->mul_cdb_is_free;
+		default:
+			return false;
+	}
+}
+
+void reset_cdb()
+{
+	_cdb_free->add_cdb_is_free = true;
+	_cdb_free->mul_cdb_is_free = true;
+	_cdb_free->div_cdb_is_free = true;
+	_cdb_free->mem_cdb_is_free = true;
+}*/
+
 void broadcast_memory()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
@@ -140,6 +186,8 @@ void broadcast_memory()
 			float mem_result = load_from_address(&load_buffers[i]);
 			broadcast_result(load_buffers[i].buff_name, mem_result);
 			load_buffers[i].timer = INSTANCE_IS_FREE;
+			write_cdb_trace_to_file(_cycles, load_buffers[i].curr_inst->inst_log->pc , load_buffers[i].curr_inst->opcode, mem_result, load_buffers[i].curr_inst->inst_log->tag);
+			break;
 		}
 	}
 
@@ -150,6 +198,7 @@ void broadcast_memory()
 			float mem_result = store_at_address(&load_buffers[i]);
 			//broadcast_result(load_buffers[i].buff_name, mem_result);
 			store_buffers[i].timer = INSTANCE_IS_FREE;
+			break;
 		}
 	}
 }

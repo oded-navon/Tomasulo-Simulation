@@ -11,6 +11,7 @@ extern config_args* _config_args_read;
 extern RAT_entry RAT[NUM_OF_REGS];
 extern float _regs[NUM_OF_REGS];
 extern inst_queue* _iq_arr;
+extern unsigned int _cycles;
 
 extern load_buffer load_buffers[MAX_CONFIG_SIZE];
 extern store_buffer store_buffers[MAX_CONFIG_SIZE];
@@ -29,6 +30,7 @@ void update_load_buffer(int index, inst* inst);
 void update_store_buffer(int index, inst* inst);
 int check_available_load_buffer();
 int check_available_store_buffer();
+
 void Issue()
 {
 	used_memory_port_in_current_cycle = false;
@@ -138,6 +140,8 @@ void update_load_buffer(int index, inst* inst)
 	memset(RAT[inst->dst].rs_or_buff_name, 0, NAME_LEN);
 	RAT[inst->dst].occupied = true;
 	snprintf(RAT[inst->dst].rs_or_buff_name, NAME_LEN, "%s", load_buffers[index].buff_name);
+	load_buffers[index].curr_inst = inst;
+	load_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 }
 
 void update_store_buffer(int index, inst* inst)
@@ -154,6 +158,8 @@ void update_store_buffer(int index, inst* inst)
 	}
 	store_buffers[index].imm = inst->imm;
 	store_buffers[index].timer = _config_args_read->mem_delay;
+	store_buffers[index].curr_inst = inst;
+	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 }
 
 int get_free_reservation_station_index(int opcode)
@@ -265,7 +271,8 @@ void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* ins
 	{
 		res_stations[free_station_index].src1 = _regs[instr->src1_index];
 	}
-
+	res_stations[free_station_index].curr_inst = instr;
+	res_stations[free_station_index].curr_inst->inst_log->cycle_issued = _cycles;
 	memset(RAT[instr->dst].rs_or_buff_name, 0, NAME_LEN);
 	snprintf(RAT[instr->dst].rs_or_buff_name, NAME_LEN, "%s", res_stations[free_station_index].name);
 	RAT[instr->dst].occupied = true;
