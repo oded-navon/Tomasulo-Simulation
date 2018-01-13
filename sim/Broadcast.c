@@ -28,8 +28,8 @@ void broadcast_memory();
 float load_from_address(load_buffer* buff);
 float store_at_address(store_buffer* buff);
 void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_result);
-float translate_bits_to_single_precision(int mem_value_as_int);
-float translate_float_to_single_precision(float val);
+float translate_int_to_float_presentation_for_mem(int mem_value_as_int);
+int translate_float_to_int_presentation_for_mem(float val);
 
 //Go over all of the calculation units and look for ready units
 void Broadcast()
@@ -142,24 +142,26 @@ void broadcast_memory()
 
 float load_from_address(load_buffer* buff)
 {
-	_regs[buff->dst] = translate_bits_to_single_precision(_memory_image_input[buff->imm]);
+	_regs[buff->dst] = translate_int_to_float_presentation_for_mem(_memory_image_input[buff->imm]);
 	return _regs[buff->dst];
 }
 
 float store_at_address(store_buffer* buff)
 {
-	_memory_image_input[buff->imm] = translate_float_to_single_precision(buff->src1);
+	_memory_image_input[buff->imm] = translate_float_to_int_presentation_for_mem(buff->src1);
 	return buff->src1;
 }
 
-float translate_bits_to_single_precision(int mem_value_as_int)
+float translate_int_to_float_presentation_for_mem(int mem_value_as_int)
 {
-	fp_repr fp = { .bin_repr = mem_value_as_int };
-	return 1.0;
+	void* void_cast = (void*) &mem_value_as_int;
+	float* res = (float*)void_cast;
+	return *res;
 }
 
-float translate_float_to_single_precision(float val)
+int translate_float_to_int_presentation_for_mem(float val)
 {
-	fp_repr fp = { .bin_repr = val };
-	return 1.0;
+	void* void_cast = (void*) &val;
+	int* res = (int*)void_cast;
+	return *res;
 }
