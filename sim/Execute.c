@@ -75,7 +75,7 @@ void Execute()
 		if (store_buffers[i].timer != INSTANCE_IS_FREE)
 		{
 			at_least_one_unit_is_not_free = true;
-			if (store_buffers[i].timer != INSTANCE_IS_READY)
+			if ((*(store_buffers[i].src1_waiting) == '\0') && store_buffers[i].timer != INSTANCE_IS_READY)
 			{
 				store_buffers[i].timer--;
 			}
