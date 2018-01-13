@@ -99,6 +99,8 @@ typedef struct {
 	int dst;	//will contain index of dst reg
 	float src0;	 //will contain value of _regs[src0]
 	float src1;	 //will contain value of _regs[src1]
+	int src0_index;
+	int src1_index;
 	char rs_waiting0[NAME_LEN];
 	char rs_waiting1[NAME_LEN];
 	inst_opcodes action_type;
