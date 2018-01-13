@@ -27,6 +27,10 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 void broadcast_memory();
 float load_from_address(load_buffer* buff);
 float store_at_address(store_buffer* buff);
+void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_result);
+float translate_bits_to_single_precision(int mem_value_as_int);
+float translate_float_to_single_precision(float val);
+
 //Go over all of the calculation units and look for ready units
 void Broadcast()
 {
@@ -108,7 +112,7 @@ void broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)
 		{
 			float operation_result = calculate_result(unit_to_broadcast);
-			broadcast_result(&unit_to_broadcast[i]);
+			broadcast_result(unit_to_broadcast->rs_name, operation_result);
 			unit_to_broadcast[i].timer = INSTANCE_IS_FREE;
 		}
 	}
@@ -138,12 +142,24 @@ void broadcast_memory()
 
 float load_from_address(load_buffer* buff)
 {
-	_regs[buff->dst] = _memory_image_input[buff->imm];
-	return _memory_image_input[buff->imm];
+	_regs[buff->dst] = translate_bits_to_single_precision(_memory_image_input[buff->imm]);
+	return _regs[buff->dst];
 }
 
 float store_at_address(store_buffer* buff)
 {
-	_memory_image_input[buff->imm] = _regs[buff->src1];
-	return _regs[buff->src1];
+	_memory_image_input[buff->imm] = translate_float_to_single_precision(buff->src1);
+	return buff->src1;
+}
+
+float translate_bits_to_single_precision(int mem_value_as_int)
+{
+	fp_repr fp = { .bin_repr = mem_value_as_int };
+	return 1.0;
+}
+
+float translate_float_to_single_precision(float val)
+{
+	fp_repr fp = { .bin_repr = val };
+	return 1.0;
 }
