@@ -30,7 +30,7 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 	for (int i = 0; i < num_of_calc_units; i++)
 	{
 		//Look for one which is free
-		if (calc_unit_to_disp_to[i].timer == CALC_UNIT_IS_FREE)
+		if (calc_unit_to_disp_to[i].timer == INSTANCE_IS_FREE)
 		{
 			//When you find a free one, look for a free reservation station
 			for (int j = 0; j < num_of_rs_units; j++)
@@ -65,7 +65,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->src0 = inst_to_dispatch->src0;
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
-	snprintf(unit_to_distpatch_to->rs_name, RS_NAME_LEN, inst_to_dispatch->name);
+	snprintf(unit_to_distpatch_to->rs_name, NAME_LEN, inst_to_dispatch->name);
 	clear_rs_inst(inst_to_dispatch);
 
 }

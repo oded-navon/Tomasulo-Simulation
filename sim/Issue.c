@@ -4,22 +4,32 @@
 extern RS rs_add[MAX_CONFIG_SIZE];
 extern RS rs_mul[MAX_CONFIG_SIZE];
 extern RS rs_div[MAX_CONFIG_SIZE]; 
-extern char rs_add_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-extern char rs_mul_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-extern char rs_div_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
+extern char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
+extern char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
+extern char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
 extern config_args* _config_args_read;
 extern RAT_entry RAT[NUM_OF_REGS];
 extern float _regs[NUM_OF_REGS];
 extern inst_queue* _iq_arr;
 
+extern load_buffer load_buffers[MAX_CONFIG_SIZE];
+extern store_buffer store_buffers[MAX_CONFIG_SIZE];
+extern bool used_memory_port_in_current_cycle;
+
+
 bool issue_instruction();
+bool issue_memory_instruction(inst* inst);
 int get_free_reservation_station_index(int opcode);
 int get_specific_free_reservation_station_index(RS rses[], int num_rses);
 int put_inst_in_RS(inst* instr);
 void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* instr);
-
+void update_load_buffer(int index, inst* inst);
+void update_store_buffer(int index, inst* inst);
+int check_available_load_buffer();
+int check_available_store_buffer();
 void Issue()
 {
+	used_memory_port_in_current_cycle = false;
 	// try to issue an instruction
 	if (issue_instruction())
 	{
@@ -31,9 +41,22 @@ void Issue()
 bool issue_instruction()
 {
 	inst* instr = peek_queue_tail();
+	int issued_successfully;
+	if (instr->opcode == LD_opcode || instr->opcode == ST_opcode)
+	{
+		if(!used_memory_port_in_current_cycle)
+		{
+			issued_successfully = issue_memory_instruction(instr);
+		}
+	}
 
-	int issued_successfully = put_inst_in_RS(instr);
-	if (issued_successfully == NO_RS_AVAILABLE)
+	else
+	{
+		issued_successfully = put_inst_in_RS(instr);
+	}
+
+
+	if (issued_successfully == NO_INSTANCE_AVAILABLE)
 	{
 		return false;
 	}
@@ -42,6 +65,82 @@ bool issue_instruction()
 		dequeue(_iq_arr);
 	}
 	return true;
+}
+
+bool issue_memory_instruction(inst* inst)
+{
+	int index;
+	switch (inst->opcode)
+	{
+	case LD_opcode:
+		index = check_available_load_buffer();
+		if(index != NO_INSTANCE_AVAILABLE)
+		{
+			used_memory_port_in_current_cycle = true;
+			update_load_buffer(index, inst);
+		}
+		break;
+	case ST_opcode:
+		index = check_available_store_buffer();
+		if (index != NO_INSTANCE_AVAILABLE)
+		{
+			used_memory_port_in_current_cycle = true;
+			update_store_buffer(index, inst);
+		}
+		break;
+	default:
+		index = NO_INSTANCE_AVAILABLE;
+	}
+
+	return index;
+}
+
+int check_available_load_buffer()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		if (!load_buffers[i].timer == INSTANCE_IS_FREE)
+		{
+			return i;
+		}
+	}
+	return NO_INSTANCE_AVAILABLE;
+}
+
+int check_available_store_buffer()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
+	{
+		if (!store_buffers[i].timer == INSTANCE_IS_FREE)
+		{
+			return i;
+		}
+	}
+	return NO_INSTANCE_AVAILABLE;
+}
+
+void update_load_buffer(int index, inst* inst)
+{
+	load_buffers[index].dst = inst->dst;
+	load_buffers[index].imm = inst->imm;
+	load_buffers[index].timer = _config_args_read->mem_delay;
+}
+
+void update_store_buffer(int index, inst* inst)
+{
+	//in case we need to wait 
+	memset(store_buffers[index].src1_waiting, 0, NAME_LEN);
+	if (RAT[inst->src1].occupied)
+	{
+		snprintf(store_buffers[index].src1_waiting, NAME_LEN, "%s", RAT[inst->src1].rs_or_buff_name);
+	}
+	else
+	{
+		store_buffers[index].src1 = _regs[inst->src1];
+		store_buffers[index].imm = inst->imm;
+		store_buffers[index].timer = _config_args_read->mem_delay;
+	}
+	
 }
 
 int get_free_reservation_station_index(int opcode)
@@ -53,9 +152,9 @@ int get_free_reservation_station_index(int opcode)
 	switch (opcode)
 	{
 		case LD_opcode:
-			return NO_RS_AVAILABLE;
+			return NO_INSTANCE_AVAILABLE;
 		case ST_opcode:
-			return NO_RS_AVAILABLE;
+			return NO_INSTANCE_AVAILABLE;
 		case ADD_opcode:
 			return get_specific_free_reservation_station_index(rs_add, _config_args_read->add_nr_reservation);
 		case SUB_opcode:
@@ -65,9 +164,9 @@ int get_free_reservation_station_index(int opcode)
 		case DIV_opcode:
 			return get_specific_free_reservation_station_index(rs_div, _config_args_read->div_nr_reservation);
 		case HALT_opcode:
-			return NO_RS_AVAILABLE;
+			return NO_INSTANCE_AVAILABLE;
 		default:
-			return NO_RS_AVAILABLE;
+			return NO_INSTANCE_AVAILABLE;
 	}
 }
 
@@ -80,7 +179,7 @@ int get_specific_free_reservation_station_index(RS rses[], int num_rses)
 			return i;
 		}
 	}
-	return NO_RS_AVAILABLE;
+	return NO_INSTANCE_AVAILABLE;
 }
 
 int put_inst_in_RS(inst* instr)
@@ -88,37 +187,31 @@ int put_inst_in_RS(inst* instr)
 	int rs_index;
 	switch (instr->opcode)
 	{
-		case LD_opcode:
-			break;
-
-		case ST_opcode:
-			break;
-
 		case ADD_opcode:
 			// blank on purpose since we do the same thing for both ADD and SUB
 		case SUB_opcode:
 			rs_index = get_specific_free_reservation_station_index(rs_add, _config_args_read->add_nr_reservation);
-			if (rs_index == NO_RS_AVAILABLE)
+			if (rs_index == NO_INSTANCE_AVAILABLE)
 			{
-				return NO_RS_AVAILABLE;
+				return NO_INSTANCE_AVAILABLE;
 			}
 			put_inst_in_specific_rs(rs_add, rs_index, instr);
 			break;
 
 		case MULT_opcode:
 			rs_index = get_specific_free_reservation_station_index(rs_mul, _config_args_read->mul_nr_reservation);
-			if (rs_index == NO_RS_AVAILABLE)
+			if (rs_index == NO_INSTANCE_AVAILABLE)
 			{
-				return NO_RS_AVAILABLE;
+				return NO_INSTANCE_AVAILABLE;
 			}
 			put_inst_in_specific_rs(rs_mul, rs_index, instr);
 			break;
 
 		case DIV_opcode:
 			rs_index = get_specific_free_reservation_station_index(rs_div, _config_args_read->mul_nr_reservation);
-			if (rs_index == NO_RS_AVAILABLE)
+			if (rs_index == NO_INSTANCE_AVAILABLE)
 			{
-				return NO_RS_AVAILABLE;
+				return NO_INSTANCE_AVAILABLE;
 			}
 			put_inst_in_specific_rs(rs_div, rs_index, instr);
 			break;
@@ -139,20 +232,20 @@ void put_inst_in_specific_rs(RS* res_stations, int free_station_index, inst* ins
 	res_stations[free_station_index].action_type = instr->opcode;
 
 	//check if the registers are wait for values in RAT or they are ready
-	memset(res_stations[free_station_index].rs_waiting0, 0, RS_NAME_LEN);
+	memset(res_stations[free_station_index].rs_waiting0, 0, NAME_LEN);
 	if (RAT[instr->src0].occupied)
 	{
-		snprintf(res_stations[free_station_index].rs_waiting0, RS_NAME_LEN, "%s", RAT[instr->src0].rs);
+		snprintf(res_stations[free_station_index].rs_waiting0, NAME_LEN, "%s", RAT[instr->src0].rs_or_buff_name);
 	}
 	else
 	{
 		res_stations[free_station_index].src0 = _regs[instr->src0];
 	}
 
-	memset(res_stations[free_station_index].rs_waiting1, 0, RS_NAME_LEN);
+	memset(res_stations[free_station_index].rs_waiting1, 0, NAME_LEN);
 	if (RAT[instr->src1].occupied)
 	{
-		snprintf(res_stations[free_station_index].rs_waiting1, RS_NAME_LEN, "%s", RAT[instr->src1].rs);
+		snprintf(res_stations[free_station_index].rs_waiting1, NAME_LEN, "%s", RAT[instr->src1].rs_or_buff_name);
 	}
 	else
 	{

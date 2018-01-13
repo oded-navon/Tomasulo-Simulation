@@ -58,23 +58,20 @@ int main(int argc, char* argv[])
 	}
 
 	init_rs_names_arrays();
+	init_buff_names_arrays();
 	init_regs();
 	clear_all_ex_units();
-
+	clear_all_buffers();
 	_cycles = 0;
+	
+	//order of operations is reversed to simulate concurrency of all of them
 	//while (instr_proc < instr_count) {
 	while (true){ //_current_inst_in_instructions <= _num_of_inst) {
-
-		Fetch();
-		
-		Issue();
-		
-		Dispatch();
-
-		Execute();
-
 		Broadcast();
-
+		Execute();
+		Dispatch();
+		Issue();
+		Fetch();
 		_cycles++;
 
 	}

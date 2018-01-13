@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define RS_NAME_LEN (10)
+#define NAME_LEN (10)
 #define MAX_ITEMS (16)
 #define TAG_LEN (10)
 #define NUM_OF_REGS (16)
@@ -17,9 +17,9 @@
 #define MAX_INST_NUM (4096)
 #define MAX_CDB_NUM (4096)
 #define MAX_CONFIG_SIZE (64)
-#define NO_RS_AVAILABLE (MAX_CONFIG_SIZE*2)
-#define CALC_UNIT_IS_FREE (-1)
-#define CALC_UNIT_IS_READY (0)
+#define NO_INSTANCE_AVAILABLE (MAX_CONFIG_SIZE*2)
+#define INSTANCE_IS_FREE (-1)
+#define INSTANCE_IS_READY (0) //meaning we can perform it's operation
 
 
 typedef enum {
@@ -60,14 +60,14 @@ typedef enum {
 
 
 typedef struct {
-	int dst;
-	float src0;
-	float src1;
-	char rs_waiting0[RS_NAME_LEN];
-	char rs_waiting1[RS_NAME_LEN];
+	int dst;	//will contain index of dst reg
+	float src0;	 //will contain value of _regs[src0]
+	float src1;	 //will contain value of _regs[src1]
+	char rs_waiting0[NAME_LEN];
+	char rs_waiting1[NAME_LEN];
 	inst_opcodes action_type;
 	bool occupied;
-	char name[RS_NAME_LEN];
+	char name[NAME_LEN];
 }RS;
 
 typedef struct {
@@ -90,12 +90,12 @@ typedef struct {
 
 typedef struct {
 	int timer;
-	int dst;
-	float src0;
-	float src1;
+	float src0;	//will contain value of _reg[src0]
+	float src1;	//will contain value of _reg[src1]
+	int dst;	//will contain index of dst reg
 	calc_unit_type calc_type;
 	//RS* dst_rs;
-	char rs_name[RS_NAME_LEN];
+	char rs_name[NAME_LEN];
 }calc_unit;
 
 typedef struct queue_node {
@@ -136,11 +136,32 @@ typedef struct {
 
 typedef struct {
 	bool occupied;
-	char rs[RS_NAME_LEN];
+	char rs_or_buff_name[NAME_LEN];
 }RAT_entry;
+
+
+typedef struct {
+	int timer;
+	int dst;
+	int imm;
+	char buff_name[NAME_LEN];
+}load_buffer;
+
+typedef struct {
+	int timer;
+	float src1;
+	int imm;
+	char src1_waiting[NAME_LEN];
+	char buff_name[NAME_LEN];
+}store_buffer;
+
+
+
 
 void cleanup(cleanup_type clean_type);
 void init_regs();
 void init_rs_names_arrays();
+void init_buff_names_arrays();
 void clear_all_ex_units();
+void clear_all_buffers();
 void clear_rs_inst(RS* inst_to_clear);

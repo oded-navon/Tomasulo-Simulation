@@ -5,9 +5,9 @@ extern config_args* _config_args_read;
 extern inst* _instructions[MAX_INST_NUM];
 extern float _regs[NUM_OF_REGS];
 
-extern char rs_add_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-extern char rs_mul_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-extern char rs_div_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
+extern char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
+extern char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
+extern char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
 
 extern calc_unit add_units[MAX_CONFIG_SIZE];
 extern calc_unit div_units[MAX_CONFIG_SIZE];
@@ -16,6 +16,9 @@ extern calc_unit mul_units[MAX_CONFIG_SIZE];
 extern RS rs_add[MAX_CONFIG_SIZE];
 extern RS rs_mul[MAX_CONFIG_SIZE];
 extern RS rs_div[MAX_CONFIG_SIZE];
+
+extern load_buffer load_buffers[MAX_CONFIG_SIZE];
+extern store_buffer store_buffers[MAX_CONFIG_SIZE];
 
 void cleanup(cleanup_type clean_type)
 {
@@ -43,19 +46,32 @@ void init_rs_names_arrays()
 {
 	for (int i = 0; i < _config_args_read->add_nr_reservation ; i++)
 	{
-		snprintf(rs_add[i].name, RS_NAME_LEN, "ADD%d", i);
+		snprintf(rs_add[i].name, NAME_LEN, "ADD%d", i);
 	}
 
 	for (int i = 0; i < _config_args_read->div_nr_reservation; i++)
 	{
-		snprintf(rs_div[i].name, RS_NAME_LEN, "DIV%d", i);
+		snprintf(rs_div[i].name, NAME_LEN, "DIV%d", i);
 	}
 	
 	for (int i = 0; i < _config_args_read->mul_nr_reservation; i++)
 	{
-		snprintf(rs_mul[i].name, RS_NAME_LEN, "MUL%d", i);
+		snprintf(rs_mul[i].name, NAME_LEN, "MUL%d", i);
 	}
 
+}
+
+void init_buff_names_arrays()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		snprintf(load_buffers[i].buff_name, NAME_LEN, "LOAD%d", i);
+	}
+
+	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
+	{
+		snprintf(store_buffers[i].buff_name, NAME_LEN, "STORE%d", i);
+	}
 }
 
 void clear_all_ex_units()
@@ -71,6 +87,18 @@ void clear_all_ex_units()
 	for (int i = 0; i < _config_args_read->add_nr_units; i++)
 	{
 		add_units[i].timer = -1;
+	}
+}
+
+void clear_all_buffers()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		load_buffers[i].timer = -1;
+	}
+	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
+	{
+		store_buffers[i].timer = -1;
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "Utils.h"
 
+bool used_memory_port_in_current_cycle;
 int memory_image_input[MEMORY_IMAGE_INPUT_SIZE];
 inst_ex* _instructions_executed[MAX_INST_NUM];
 config_args* _config_args_read;
@@ -19,10 +20,13 @@ RS rs_add[MAX_CONFIG_SIZE];
 RS rs_mul[MAX_CONFIG_SIZE];
 RS rs_div[MAX_CONFIG_SIZE];
 
-char rs_add_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-char rs_mul_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
-char rs_div_names[MAX_CONFIG_SIZE][RS_NAME_LEN];
+char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
+char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
+char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
 
 calc_unit add_units[MAX_CONFIG_SIZE]; //TODO: look into starvation
 calc_unit div_units[MAX_CONFIG_SIZE];
 calc_unit mul_units[MAX_CONFIG_SIZE];
+
+load_buffer load_buffers[MAX_CONFIG_SIZE];
+store_buffer store_buffers[MAX_CONFIG_SIZE];
