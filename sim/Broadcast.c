@@ -76,13 +76,15 @@ void broadcast_result(char* rs_or_buff_name, float value)
 
 float calculate_result(calc_unit* unit_to_broadcast)
 {
-	switch (unit_to_broadcast->calc_type)
+	switch (unit_to_broadcast->curr_inst->opcode)
 	{
-		case ADD_calc_unit:
+		case ADD_opcode:
 			return unit_to_broadcast->src0 + unit_to_broadcast->src1;
-		case MUL_calc_unit:
+		case SUB_opcode:
+			return unit_to_broadcast->src0 - unit_to_broadcast->src1;
+		case MULT_opcode:
 			return unit_to_broadcast->src0 * unit_to_broadcast->src1;
-		case DIV_calc_unit:
+		case DIV_opcode:
 			return unit_to_broadcast->src0 / unit_to_broadcast->src1;
 		default:
 			return 0.0;
@@ -207,6 +209,7 @@ bool broadcast_memory()
 			return all_units_are_free;
 		}
 	}
+	return all_units_are_free;
 }
 
 float load_from_address(load_buffer* buff)

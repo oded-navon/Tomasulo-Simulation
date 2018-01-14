@@ -1,7 +1,7 @@
 #include "Execute.h"
 #include "Utils.h"
 
-#define LAST_EX_CYCLE (1)
+#define LAST_EX_CYCLE (0)
 
 extern calc_unit add_units[MAX_CONFIG_SIZE];
 extern calc_unit div_units[MAX_CONFIG_SIZE];
