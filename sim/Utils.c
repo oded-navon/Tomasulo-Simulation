@@ -127,7 +127,8 @@ void clear_rs_inst(char* inst_to_clear_name)
 		if (strcmp(inst_to_clear_name, rs_add[i].name) == 0)
 		{
 			rs_add[i].occupied = false;
-			rs_add[i].occupied = true;
+			rs_add[i].just_broadcasted = true;
+			rs_add[i].already_dispatched = false;
 		}
 	}
 
@@ -136,7 +137,8 @@ void clear_rs_inst(char* inst_to_clear_name)
 		if (strcmp(inst_to_clear_name, rs_div[i].name) == 0)
 		{
 			rs_div[i].occupied = false;
-			rs_div[i].occupied = true;
+			rs_div[i].just_broadcasted = true;
+			rs_div[i].already_dispatched = false;
 		}
 	}
 
@@ -145,7 +147,8 @@ void clear_rs_inst(char* inst_to_clear_name)
 		if (strcmp(inst_to_clear_name, rs_mul[i].name) == 0)
 		{
 			rs_mul[i].occupied = false;
-			rs_mul[i].occupied = true;
+			rs_mul[i].just_broadcasted = true;
+			rs_mul[i].already_dispatched = false;
 		}
 	}
 }

@@ -14,7 +14,7 @@ extern bool finished_issue; //means to stop handle issues
 extern bool finished_dispatch; //means to stop dispatching
 
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
-bool is_rs_inst_ready(RS* inst);
+bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 bool check_if_at_least_one_reservation_station_is_occupied();
 void Dispatch()
@@ -112,7 +112,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
 	snprintf(unit_to_distpatch_to->rs_name, NAME_LEN, inst_to_dispatch->name);
-	
+	inst_to_dispatch->already_dispatched = true;
 	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
 	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
 	//clear_rs_inst(inst_to_dispatch);
@@ -120,7 +120,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 
 
 
-bool is_rs_inst_ready(RS* inst)
+bool is_rs_inst_ready(RS* res_station)
 {
-	return (inst->occupied) && (*(inst->rs_waiting0) == '\0') && (*(inst->rs_waiting1) == '\0');
+	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0') && (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched);
 }

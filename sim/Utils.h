@@ -108,6 +108,7 @@ typedef struct {
 	char name[NAME_LEN];
 	inst* curr_inst;
 	bool just_broadcasted;
+	bool already_dispatched;
 }RS;
 
 typedef struct {
