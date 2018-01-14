@@ -33,6 +33,12 @@ void update_store_buffer(int index, inst* inst);
 int check_available_load_buffer();
 int check_available_store_buffer();
 
+//these 2 methods are used to correctly simulate the concurrency of dispatch and issue units, meaning
+//we can't issue an instruction to an RS at the same cycle that the RS got vacated.
+void enable_just_dispatched_rses();
+void enable_just_dispatched_specific_rses(RS rses[], int num_rses);
+
+
 void Issue()
 {
 	used_memory_port_in_current_cycle = false;
@@ -47,6 +53,7 @@ void Issue()
 		// only if we succeeded, try issuing another
 		issue_instruction();
 	}
+	enable_just_dispatched_rses();
 }
 
 bool issue_instruction()
@@ -202,7 +209,7 @@ int get_specific_free_reservation_station_index(RS rses[], int num_rses)
 {
 	for (int i = 0; i < num_rses; i++)
 	{
-		if (!rses[i].occupied) 
+		if (!rses[i].occupied && !rses[i].just_dispatched) 
 		{
 			return i;
 		}
@@ -223,7 +230,7 @@ int put_inst_in_RS(inst* instr)
 			{
 				return NO_INSTANCE_AVAILABLE;
 			}
-			put_inst_in_specific_rs(rs_add, rs_index, instr);
+			put_inst_in_specific_rs(rs_add, rs_index, instr);																		
 			break;
 
 		case MULT_opcode:
@@ -285,4 +292,19 @@ void put_inst_in_specific_rs(RS res_stations[], int free_station_index, inst* in
 	memset(RAT[instr->dst].rs_or_buff_name, 0, NAME_LEN);
 	snprintf(RAT[instr->dst].rs_or_buff_name, NAME_LEN, "%s", res_stations[free_station_index].name);
 	RAT[instr->dst].occupied = true;
+}
+
+void enable_just_dispatched_rses()
+{
+	enable_just_dispatched_specific_rses(rs_add, _config_args_read->add_nr_reservation);
+	enable_just_dispatched_specific_rses(rs_mul, _config_args_read->mul_nr_reservation);
+	enable_just_dispatched_specific_rses(rs_div, _config_args_read->div_nr_reservation);
+}
+
+void enable_just_dispatched_specific_rses(RS rses[], int num_rses)
+{
+	for (int i = 0; i < num_rses; i++)
+	{
+		rses[i].just_dispatched = true;
+	}
 }
