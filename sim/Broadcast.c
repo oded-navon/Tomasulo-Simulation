@@ -130,7 +130,7 @@ bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 	{
 		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)
 		{
-			float operation_result = calculate_result(unit_to_broadcast);
+			float operation_result = calculate_result(&unit_to_broadcast[i]);
 			broadcast_result(unit_to_broadcast[i].rs_name, operation_result);
 			unit_to_broadcast[i].timer = INSTANCE_IS_FREE;
 			unit_to_broadcast[i].curr_inst->inst_log->write_cdb = _cycles;
@@ -142,7 +142,6 @@ bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 			clear_rs_inst(unit_to_broadcast[i].rs_name);
 
 			break;
-			//set_cdb_occupied(unit_to_broadcast->calc_type);
 		}
 	}
 	return all_units_are_free;

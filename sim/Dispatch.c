@@ -17,6 +17,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 bool check_if_at_least_one_reservation_station_is_occupied();
+
 void Dispatch()
 {
 	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_reservation_station_is_occupied();
@@ -126,8 +127,6 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
 	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
 }
-
-
 
 bool is_rs_inst_ready(RS* res_station)
 {
