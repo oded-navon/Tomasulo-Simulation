@@ -99,11 +99,13 @@ void broadcast_to_rs(int num_of_rs_stations, float operation_result, RS* rs_stat
 		{
 			memset(rs_stations[i].rs_waiting0, 0, NAME_LEN);
 			rs_stations[i].src0 = operation_result;
+			rs_stations[i].just_got_a_broadcast = true;
 		}
 		if (rs_stations[i].occupied && strcmp(rs_stations[i].rs_waiting1, unit_to_broadcast_name) == 0)
 		{
 			memset(rs_stations[i].rs_waiting1, 0, NAME_LEN);
 			rs_stations[i].src1 = operation_result;
+			rs_stations[i].just_got_a_broadcast = true;
 		}
 	}
 }
@@ -116,6 +118,7 @@ void broadcast_to_store_buffers(char* unit_to_broadcast_name, float operation_re
 		{
 			memset(store_buffers[i].src1_waiting, 0, NAME_LEN);
 			store_buffers[i].src1 = operation_result;
+			store_buffers[i].just_got_a_broadcast = true;
 		}
 	}
 }
@@ -132,6 +135,7 @@ bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 			unit_to_broadcast[i].timer = INSTANCE_IS_FREE;
 			unit_to_broadcast[i].curr_inst->inst_log->write_cdb = _cycles;
 			write_cdb_trace_to_file(_cycles, unit_to_broadcast[i].curr_inst->inst_log->pc, unit_to_broadcast[i].curr_inst->opcode, operation_result, unit_to_broadcast[i].curr_inst->inst_log->tag);
+			unit_to_broadcast[i].just_broadcasted = true;
 			//This 'break' causes the CDB to only take 1 value in each cycle. We find the first unit which is ready and broadcast
 			//its result, and then break. So only the first ready unit is broadcasted in effect.
 			all_units_are_free = false;
@@ -143,45 +147,6 @@ bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 	}
 	return all_units_are_free;
 }
-
-/*void set_cdb_occupied(calc_unit_type unit_type)
-{
-	switch (unit_type)
-	{
-	case ADD_calc_unit:
-		_cdb_free->add_cdb_is_free = false;
-		break;
-	case DIV_calc_unit:
-		_cdb_free->div_cdb_is_free = false;
-		break;
-	case MUL_calc_unit:
-		_cdb_free->mul_cdb_is_free = false;
-		break;
-	}
-}
-
-bool cdb_is_free(calc_unit_type unit_type)
-{
-	switch (unit_type)
-	{
-		case ADD_calc_unit:
-			return _cdb_free->add_cdb_is_free;
-		case DIV_calc_unit:
-			return _cdb_free->div_cdb_is_free;
-		case MUL_calc_unit:
-			return _cdb_free->mul_cdb_is_free;
-		default:
-			return false;
-	}
-}
-
-void reset_cdb()
-{
-	_cdb_free->add_cdb_is_free = true;
-	_cdb_free->mul_cdb_is_free = true;
-	_cdb_free->div_cdb_is_free = true;
-	_cdb_free->mem_cdb_is_free = true;
-}*/
 
 bool broadcast_memory()
 {

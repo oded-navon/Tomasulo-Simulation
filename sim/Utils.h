@@ -105,10 +105,14 @@ typedef struct {
 	char rs_waiting1[NAME_LEN];
 	inst_opcodes action_type;
 	bool occupied;
+	bool already_dispatched;
 	char name[NAME_LEN];
 	inst* curr_inst;
+	//These flags are for simulating a concurrent processor operation
+	//This flag is for making sure that we don't use the RS if we just broadcasted its execution result
 	bool just_broadcasted;
-	bool already_dispatched;
+	//This flag is for making sure that we don't dispatch the RS station in the same cycle that we got all of its data
+	bool just_got_a_broadcast;
 }RS;
 
 typedef struct {
@@ -119,6 +123,7 @@ typedef struct {
 	calc_unit_type calc_type;
 	inst* curr_inst;
 	char rs_name[NAME_LEN];
+	bool just_broadcasted;
 }calc_unit;
 
 typedef struct queue_node {
@@ -160,6 +165,7 @@ typedef struct {
 	int imm;
 	char buff_name[NAME_LEN];
 	inst* curr_inst;
+	bool just_broadcasted;
 }load_buffer;
 
 typedef struct {
@@ -170,6 +176,7 @@ typedef struct {
 	char src1_waiting[NAME_LEN];
 	char buff_name[NAME_LEN];
 	inst* curr_inst;
+	bool just_got_a_broadcast;
 }store_buffer;
 
 

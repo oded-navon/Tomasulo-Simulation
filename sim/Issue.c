@@ -126,7 +126,7 @@ int check_available_load_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer == INSTANCE_IS_FREE)
+		if (load_buffers[i].timer == INSTANCE_IS_FREE && !load_buffers[i].just_broadcasted)
 		{
 			return i;
 		}
@@ -138,9 +138,14 @@ int check_available_store_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (store_buffers[i].timer == INSTANCE_IS_FREE)
+		if (store_buffers[i].timer == INSTANCE_IS_FREE && !store_buffers[i].just_got_a_broadcast)
 		{
 			return i;
+		}
+
+		for (int f = 0; f <  _config_args_read->mem_nr_store_buffers ; f++)
+		{
+			store_buffers[f].just_got_a_broadcast = false;
 		}
 	}
 	return NO_INSTANCE_AVAILABLE;

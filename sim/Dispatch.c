@@ -19,7 +19,7 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 bool check_if_at_least_one_reservation_station_is_occupied();
 void Dispatch()
 {
-	finished_dispatch = received_halt_in_fetch && finished_issue && check_if_at_least_one_reservation_station_is_occupied();
+	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_reservation_station_is_occupied();
 	if (finished_dispatch)
 	{
 		return;
@@ -70,7 +70,7 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 	for (int i = 0; i < num_of_calc_units; i++)
 	{
 		//Look for one which is free
-		if (calc_unit_to_disp_to[i].timer == INSTANCE_IS_FREE)
+		if (calc_unit_to_disp_to[i].timer == INSTANCE_IS_FREE && !calc_unit_to_disp_to[i].just_broadcasted)
 		{
 			//When you find a free one, look for a free reservation station
 			for (int j = 0; j < num_of_rs_units; j++)
@@ -83,6 +83,16 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 				}
 			}
 		}
+	}
+	//This is used to make sure there is a cycle difference between a calc unit's broadcast and dispatching another inst into it
+	for (int f = 0; f < num_of_calc_units; f++)
+	{
+		calc_unit_to_disp_to[f].just_broadcasted = false;
+	}
+	//This is used to reset the RS units that just got a broadcast and we didn't use them.
+	for (int f = 0; f < num_of_rs_units; f++)
+	{
+		rs_unit_to_disp_from[f].just_got_a_broadcast = false;
 	}
 }
 
@@ -115,12 +125,11 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	inst_to_dispatch->already_dispatched = true;
 	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
 	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
-	//clear_rs_inst(inst_to_dispatch);
 }
 
 
 
 bool is_rs_inst_ready(RS* res_station)
 {
-	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0') && (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched);
+	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0') && (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched) && !res_station->just_got_a_broadcast;
 }
