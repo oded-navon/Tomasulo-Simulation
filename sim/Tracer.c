@@ -156,5 +156,6 @@ void write_cdb_trace_to_file(int cycle, int inst_pc, inst_opcodes unit_type, flo
 		data,
 		tag
 	);
+	fprintf(file, line_to_print);
 	fclose(file);
 }
