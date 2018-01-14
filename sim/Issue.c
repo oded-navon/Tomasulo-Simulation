@@ -305,6 +305,6 @@ void enable_just_dispatched_specific_rses(RS rses[], int num_rses)
 {
 	for (int i = 0; i < num_rses; i++)
 	{
-		rses[i].just_dispatched = true;
+		rses[i].just_dispatched = false;
 	}
 }

@@ -201,7 +201,7 @@ bool broadcast_memory()
 		if (store_buffers[i].timer == INSTANCE_IS_READY)
 		{
 			all_units_are_free = false;
-			float mem_result = store_at_address(&load_buffers[i]);
+			float mem_result = store_at_address(&store_buffers[i]);
 			//broadcast_result(load_buffers[i].buff_name, mem_result);
 			store_buffers[i].timer = INSTANCE_IS_FREE;
 			return all_units_are_free;
