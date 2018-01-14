@@ -91,22 +91,28 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	switch (unit_type)
 	{
 		case ADD_calc_unit:
-			unit_to_distpatch_to->timer = _config_args_read->add_delay;
+			unit_to_distpatch_to->timer = _config_args_read->add_delay-1;
 			break;
 		case DIV_calc_unit:
-			unit_to_distpatch_to->timer = _config_args_read->div_delay;
+			unit_to_distpatch_to->timer = _config_args_read->div_delay-1;
 			break;
 		case MUL_calc_unit:
-			unit_to_distpatch_to->timer = _config_args_read->mul_delay;
+			unit_to_distpatch_to->timer = _config_args_read->mul_delay-1;
 			break;
 	}
-
+	unit_to_distpatch_to->curr_inst = inst_to_dispatch->curr_inst;
+	//This is for the case that the delay is 1, and the flow will go directly to Dispatch() next cycle
+	//We still want to mark the cycle for the log
+	if (unit_to_distpatch_to->timer == 0)
+	{
+		unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_end = _cycles;
+	}
 	unit_to_distpatch_to->calc_type = unit_type;
 	unit_to_distpatch_to->src0 = inst_to_dispatch->src0;
 	unit_to_distpatch_to->src1 = inst_to_dispatch->src1;
 	unit_to_distpatch_to->dst = inst_to_dispatch->dst;
 	snprintf(unit_to_distpatch_to->rs_name, NAME_LEN, inst_to_dispatch->name);
-	unit_to_distpatch_to->curr_inst = inst_to_dispatch->curr_inst;
+	
 	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
 	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
 	clear_rs_inst(inst_to_dispatch);

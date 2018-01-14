@@ -10,6 +10,8 @@
 #include "Globals.c"
 #include "Tracer.h"
 
+#define QUEUE_MAX_SIZE (16)
+
 extern int _last_unoccupied_index_in_iq;
 extern unsigned int _cycles;
 extern int _num_of_inst;
@@ -53,7 +55,7 @@ int main(int argc, char* argv[])
 	int return_value = SUCCESS;
 	_iq_arr = malloc(sizeof(inst_queue));
 	_iq_arr->num_items_in_queue = 0;
-
+	_iq_arr->queue_max_size = QUEUE_MAX_SIZE;
 	int ret_args = parse_args(argv);
 	if (ret_args == -1)
 	{

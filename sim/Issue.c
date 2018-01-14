@@ -268,7 +268,7 @@ void put_inst_in_specific_rs(RS res_stations[], int free_station_index, inst* in
 	}
 	else
 	{
-		res_stations[free_station_index].src0_index = _regs[instr->src0_index];
+		res_stations[free_station_index].src0 = _regs[instr->src0_index];
 	}
 
 	memset(res_stations[free_station_index].rs_waiting1, 0, NAME_LEN);
