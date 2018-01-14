@@ -30,6 +30,12 @@ int parse_args(char* argv[])
 	char* config_file_path = argv[1];
 	char* memory_in_path = argv[2];
 	_trace_cdb_file_path = argv[6];
+	//checking if the tracecdb file exists already, if it does- delete it since we append to it.
+	FILE* _trace_file_check = fopen(_trace_cdb_file_path, "r");
+	if (_trace_file_check != NULL)
+	{
+		fclose(fopen(_trace_cdb_file_path, "w"));
+	}
 
 	int return_value = SUCCESS;
 	cleanup_type cleanup_ret = cleanup_config;
