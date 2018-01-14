@@ -19,7 +19,7 @@ void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit
 bool check_if_at_least_one_reservation_station_is_occupied();
 void Dispatch()
 {
-	finished_dispatch = received_halt_in_fetch && finished_issue && (finished_dispatch || check_if_at_least_one_reservation_station_is_occupied());
+	finished_dispatch = received_halt_in_fetch && finished_issue && check_if_at_least_one_reservation_station_is_occupied();
 	if (finished_dispatch)
 	{
 		return;
