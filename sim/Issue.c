@@ -209,7 +209,7 @@ int get_specific_free_reservation_station_index(RS rses[], int num_rses)
 {
 	for (int i = 0; i < num_rses; i++)
 	{
-		if (!rses[i].occupied && !rses[i].just_dispatched) 
+		if (!rses[i].occupied && !rses[i].just_broadcasted) 
 		{
 			return i;
 		}
@@ -305,6 +305,6 @@ void enable_just_dispatched_specific_rses(RS rses[], int num_rses)
 {
 	for (int i = 0; i < num_rses; i++)
 	{
-		rses[i].just_dispatched = false;
+		rses[i].just_broadcasted = false;
 	}
 }

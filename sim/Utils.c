@@ -120,9 +120,33 @@ void clear_all_buffers()
 	}
 }
 
-void clear_rs_inst(RS* inst_to_clear)
+void clear_rs_inst(char* inst_to_clear_name)
 {
-	inst_to_clear->occupied = false;
-	inst_to_clear->just_dispatched = true;
+	for (int i = 0; i < _config_args_read->add_nr_reservation; i++)
+	{
+		if (strcmp(inst_to_clear_name, rs_add[i].name) == 0)
+		{
+			rs_add[i].occupied = false;
+			rs_add[i].occupied = true;
+		}
+	}
+
+	for (int i = 0; i < _config_args_read->div_nr_reservation; i++)
+	{
+		if (strcmp(inst_to_clear_name, rs_div[i].name) == 0)
+		{
+			rs_div[i].occupied = false;
+			rs_div[i].occupied = true;
+		}
+	}
+
+	for (int i = 0; i < _config_args_read->mul_nr_reservation; i++)
+	{
+		if (strcmp(inst_to_clear_name, rs_mul[i].name) == 0)
+		{
+			rs_mul[i].occupied = false;
+			rs_mul[i].occupied = true;
+		}
+	}
 }
 

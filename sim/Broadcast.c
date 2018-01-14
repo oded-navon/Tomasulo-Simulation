@@ -128,13 +128,15 @@ bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broa
 		if (unit_to_broadcast[i].timer == INSTANCE_IS_READY)
 		{
 			float operation_result = calculate_result(unit_to_broadcast);
-			broadcast_result(unit_to_broadcast->rs_name, operation_result);
+			broadcast_result(unit_to_broadcast[i].rs_name, operation_result);
 			unit_to_broadcast[i].timer = INSTANCE_IS_FREE;
-			unit_to_broadcast->curr_inst->inst_log->write_cdb = _cycles;
-			write_cdb_trace_to_file(_cycles, unit_to_broadcast->curr_inst->inst_log->pc, unit_to_broadcast->curr_inst->opcode, operation_result, unit_to_broadcast->curr_inst->inst_log->tag);
+			unit_to_broadcast[i].curr_inst->inst_log->write_cdb = _cycles;
+			write_cdb_trace_to_file(_cycles, unit_to_broadcast[i].curr_inst->inst_log->pc, unit_to_broadcast[i].curr_inst->opcode, operation_result, unit_to_broadcast[i].curr_inst->inst_log->tag);
 			//This 'break' causes the CDB to only take 1 value in each cycle. We find the first unit which is ready and broadcast
 			//its result, and then break. So only the first ready unit is broadcasted in effect.
 			all_units_are_free = false;
+			clear_rs_inst(unit_to_broadcast[i].rs_name);
+
 			break;
 			//set_cdb_occupied(unit_to_broadcast->calc_type);
 		}

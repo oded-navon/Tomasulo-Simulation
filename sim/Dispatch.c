@@ -115,7 +115,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 	
 	unit_to_distpatch_to->curr_inst->inst_log->cycle_ex_start = _cycles;
 	snprintf(unit_to_distpatch_to->curr_inst->inst_log->tag, TAG_LEN, unit_to_distpatch_to->rs_name);
-	clear_rs_inst(inst_to_dispatch);
+	//clear_rs_inst(inst_to_dispatch);
 }
 
 

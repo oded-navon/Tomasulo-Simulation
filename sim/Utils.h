@@ -107,7 +107,7 @@ typedef struct {
 	bool occupied;
 	char name[NAME_LEN];
 	inst* curr_inst;
-	bool just_dispatched;
+	bool just_broadcasted;
 }RS;
 
 typedef struct {
@@ -180,4 +180,4 @@ void init_buff_names_arrays();
 void init_inst_ex_array();
 void clear_all_ex_units();
 void clear_all_buffers();
-void clear_rs_inst(RS* inst_to_clear);
+void clear_rs_inst(char* inst_to_clear_name);
