@@ -35,9 +35,10 @@ int check_available_store_buffer();
 
 //these 2 methods are used to correctly simulate the concurrency of dispatch and issue units, meaning
 //we can't issue an instruction to an RS at the same cycle that the RS got vacated.
+//same goes for load buffers
 void enable_just_dispatched_rses();
 void enable_just_dispatched_specific_rses(RS rses[], int num_rses);
-
+void enable_just_load_buffers_that_finished_broadcast();
 
 void Issue()
 {
@@ -54,6 +55,11 @@ void Issue()
 		issue_instruction();
 	}
 	enable_just_dispatched_rses();
+	enable_just_load_buffers_that_finished_broadcast();
+	for (int f = 0; f < _config_args_read->mem_nr_store_buffers; f++)
+	{
+		store_buffers[f].just_got_a_broadcast = false;
+	}
 }
 
 bool issue_instruction()
@@ -138,14 +144,9 @@ int check_available_store_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (store_buffers[i].timer == INSTANCE_IS_FREE && !store_buffers[i].just_got_a_broadcast)
+		if (store_buffers[i].timer == INSTANCE_IS_FREE)
 		{
 			return i;
-		}
-
-		for (int f = 0; f <  _config_args_read->mem_nr_store_buffers ; f++)
-		{
-			store_buffers[f].just_got_a_broadcast = false;
 		}
 	}
 	return NO_INSTANCE_AVAILABLE;
@@ -311,5 +312,14 @@ void enable_just_dispatched_specific_rses(RS rses[], int num_rses)
 	for (int i = 0; i < num_rses; i++)
 	{
 		rses[i].just_broadcasted = false;
+	}
+}
+
+
+void enable_just_load_buffers_that_finished_broadcast()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		load_buffers[i].just_broadcasted = false;
 	}
 }
