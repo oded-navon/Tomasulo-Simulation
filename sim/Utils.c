@@ -123,5 +123,6 @@ void clear_all_buffers()
 void clear_rs_inst(RS* inst_to_clear)
 {
 	inst_to_clear->occupied = false;
+	inst_to_clear->just_dispatched = true;
 }
 

@@ -30,7 +30,6 @@ char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
 
 void broadcast_result(char* rs_or_buff_name, float value);
 float calculate_result(calc_unit* unit_to_broadcast);
-void clear_rs_inst(RS* inst_to_clear);
 void broadcast_to_rs(int num_of_rs_stations, float operation_result, RS* rs_stations, char* unit_to_broadcast_name);
 bool broadcast_specific_calc_type(int num_of_calc_units, calc_unit* unit_to_broadcast);
 bool broadcast_memory();
@@ -56,7 +55,7 @@ void Broadcast()
 
 }
 
-//Broadcast goes over the RAT and the reservation stations and looks for the relevant tag
+//Broadcast goes over the RAT and the reservation stations and looks for the relevant tag, which is the rs_or_buff_name parameter
 void broadcast_result(char* rs_or_buff_name, float value)
 {
 	//Go over all the entries in the RAT table and handle the relevant entries, also insert the value to the regs table
@@ -182,7 +181,7 @@ void reset_cdb()
 
 bool broadcast_memory()
 {
-	bool all_units_are_free = true;
+	bool all_units_are_free = true;	//this flag helps us determine when the program ended it's run.
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
 		if (load_buffers[i].timer == INSTANCE_IS_READY)
@@ -192,6 +191,7 @@ bool broadcast_memory()
 			broadcast_result(load_buffers[i].buff_name, mem_result);
 			load_buffers[i].timer = INSTANCE_IS_FREE;
 			write_cdb_trace_to_file(_cycles, load_buffers[i].curr_inst->inst_log->pc , load_buffers[i].curr_inst->opcode, mem_result, load_buffers[i].curr_inst->inst_log->tag);
+			//This 'return' simulates the CDB only taking 1 value in each cycle. 
 			return all_units_are_free;
 		}
 	}
