@@ -88,6 +88,11 @@ bool write_inst_output(char * traceinst_file)
 	int check_ret = 0;
 	for (int i = 0; i < _num_of_inst; i++)
 	{
+		if (_instructions[i]->opcode == HALT_opcode)
+		{
+			break;
+		}
+		
 		char line_to_print[MAX_LINE_LEN];
 		inst_ex* output_inst_arg = _instructions[i]->inst_log;
 		
