@@ -159,6 +159,7 @@ bool broadcast_memory()
 			broadcast_result(load_buffers[i].buff_name, mem_result);
 			load_buffers[i].timer = INSTANCE_IS_FREE;
 			write_cdb_trace_to_file(_cycles, load_buffers[i].curr_inst->inst_log->pc , load_buffers[i].curr_inst->opcode, mem_result, load_buffers[i].curr_inst->inst_log->tag);
+			load_buffers[i].curr_inst->inst_log->write_cdb = _cycles;
 			//This 'return' simulates the CDB only taking 1 value in each cycle. 
 			return all_units_are_free;
 		}

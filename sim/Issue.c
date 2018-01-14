@@ -161,6 +161,7 @@ void update_load_buffer(int index, inst* inst)
 	snprintf(RAT[inst->dst].rs_or_buff_name, NAME_LEN, "%s", load_buffers[index].buff_name);
 	load_buffers[index].curr_inst = inst;
 	load_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
+	snprintf(load_buffers[index].curr_inst->inst_log->tag, NAME_LEN, "%s", load_buffers[index].buff_name);
 }
 
 void update_store_buffer(int index, inst* inst)
@@ -180,6 +181,7 @@ void update_store_buffer(int index, inst* inst)
 	store_buffers[index].curr_inst = inst;
 	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 	store_buffers[index].curr_inst->inst_log->write_cdb = IRRELEVANT;
+	snprintf(store_buffers[index].curr_inst->inst_log->tag, NAME_LEN, "%s", load_buffers[index].buff_name);
 
 }
 
