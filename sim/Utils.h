@@ -20,6 +20,7 @@
 #define MAX_CONFIG_SIZE (64)
 #define NO_INSTANCE_AVAILABLE (MAX_CONFIG_SIZE*2)
 #define INSTANCE_IS_FREE (-1)
+#define INSTANCE_NOT_RUNNING (-1)
 #define INSTANCE_IS_READY (0) //meaning we can perform it's operation
 
 
@@ -99,8 +100,6 @@ typedef struct {
 	int dst;	//will contain index of dst reg
 	float src0;	 //will contain value of _regs[src0]
 	float src1;	 //will contain value of _regs[src1]
-	int src0_index;
-	int src1_index;
 	char rs_waiting0[NAME_LEN];
 	char rs_waiting1[NAME_LEN];
 	inst_opcodes action_type;
@@ -166,17 +165,18 @@ typedef struct {
 	char buff_name[NAME_LEN];
 	inst* curr_inst;
 	bool just_broadcasted;
+	bool occupied;
 }load_buffer;
 
 typedef struct {
 	int timer;
-	int src1_index;
 	float src1;
 	int imm;
 	char src1_waiting[NAME_LEN];
 	char buff_name[NAME_LEN];
 	inst* curr_inst;
 	bool just_got_a_broadcast;
+	bool occupied;
 }store_buffer;
 
 

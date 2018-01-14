@@ -17,7 +17,6 @@ extern unsigned int _cycles;
 
 extern load_buffer load_buffers[MAX_CONFIG_SIZE];
 extern store_buffer store_buffers[MAX_CONFIG_SIZE];
-extern bool used_memory_port_in_current_cycle;
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 
@@ -42,7 +41,6 @@ void enable_just_load_buffers_that_finished_broadcast();
 
 void Issue()
 {
-	used_memory_port_in_current_cycle = false;
 	if (received_halt_in_fetch && finished_issue)
 	{
 		return;
@@ -77,10 +75,7 @@ bool issue_instruction()
 	int issued_successfully = NO_INSTANCE_AVAILABLE;
 	if (instr->opcode == LD_opcode || instr->opcode == ST_opcode)
 	{
-		if(!used_memory_port_in_current_cycle)
-		{
-			issued_successfully = issue_memory_instruction(instr);
-		}
+		issued_successfully = issue_memory_instruction(instr);
 	}
 
 	else
@@ -109,7 +104,6 @@ bool issue_memory_instruction(inst* inst)
 		index = check_available_load_buffer();
 		if(index != NO_INSTANCE_AVAILABLE)
 		{
-			used_memory_port_in_current_cycle = true;
 			update_load_buffer(index, inst);
 		}
 		break;
@@ -117,7 +111,6 @@ bool issue_memory_instruction(inst* inst)
 		index = check_available_store_buffer();
 		if (index != NO_INSTANCE_AVAILABLE)
 		{
-			used_memory_port_in_current_cycle = true;
 			update_store_buffer(index, inst);
 		}
 		break;
@@ -156,7 +149,8 @@ void update_load_buffer(int index, inst* inst)
 {
 	load_buffers[index].dst = inst->dst;
 	load_buffers[index].imm = inst->imm;
-	load_buffers[index].timer = _config_args_read->mem_delay;
+	load_buffers[index].occupied =true;
+	//load_buffers[index].timer = _config_args_read->mem_delay;
 	memset(RAT[inst->dst].rs_or_buff_name, 0, NAME_LEN);
 	RAT[inst->dst].occupied = true;
 	snprintf(RAT[inst->dst].rs_or_buff_name, NAME_LEN, "%s", load_buffers[index].buff_name);
@@ -177,7 +171,8 @@ void update_store_buffer(int index, inst* inst)
 		store_buffers[index].src1 = _regs[inst->src1_index];
 	}
 	store_buffers[index].imm = inst->imm;
-	store_buffers[index].timer = _config_args_read->mem_delay;
+	//store_buffers[index].timer = _config_args_read->mem_delay;
+	store_buffers[index].occupied = true;
 	store_buffers[index].curr_inst = inst;
 	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 	store_buffers[index].curr_inst->inst_log->write_cdb = IRRELEVANT;

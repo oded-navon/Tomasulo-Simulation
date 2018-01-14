@@ -12,12 +12,14 @@ extern unsigned int _cycles;
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 extern bool finished_dispatch; //means to stop dispatching
+extern load_buffer load_buffers[MAX_CONFIG_SIZE];
+extern store_buffer store_buffers[MAX_CONFIG_SIZE];
 
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
 bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 bool check_if_at_least_one_reservation_station_is_occupied();
-
+void find_memory_instruction_to_dispatch();
 void Dispatch()
 {
 	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_reservation_station_is_occupied();
@@ -30,7 +32,35 @@ void Dispatch()
 	find_inst_to_dispatch(_config_args_read->add_nr_units, _config_args_read->add_nr_reservation, add_units, rs_add, ADD_calc_unit);
 	find_inst_to_dispatch(_config_args_read->div_nr_units, _config_args_read->div_nr_reservation, div_units, rs_div, DIV_calc_unit);
 	find_inst_to_dispatch(_config_args_read->mul_nr_units, _config_args_read->mul_nr_reservation, mul_units, rs_mul, MUL_calc_unit);
+	find_memory_instruction_to_dispatch();
 
+}
+
+void find_memory_instruction_to_dispatch()
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		if (load_buffers[i].timer != INSTANCE_NOT_RUNNING && (load_buffers[i].occupied))
+		{
+			load_buffers[i].timer = _config_args_read->mem_delay;
+			break;
+		}
+	}
+
+	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
+	{
+		if ((store_buffers[i].timer != INSTANCE_NOT_RUNNING) && (store_buffers[i].occupied) && (*(store_buffers[i].src1_waiting) == '\0') && !store_buffers[i].just_got_a_broadcast)
+		{
+			store_buffers[i].timer = _config_args_read->mem_delay;
+			break;
+		}
+	}
+
+	////This is used to make sure there is a cycle difference between a broadcast and re-using the buffer
+	for (int f = 0; f < _config_args_read->mem_nr_store_buffers; f++)
+	{
+		store_buffers[f].just_got_a_broadcast = false;
+	}
 }
 
 bool check_if_at_least_one_reservation_station_is_occupied()

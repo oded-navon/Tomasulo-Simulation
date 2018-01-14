@@ -74,7 +74,7 @@ void Execute()
 
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer != INSTANCE_IS_FREE)
+		if (load_buffers[i].timer != INSTANCE_NOT_RUNNING)
 		{
 			at_least_one_unit_is_not_free = true;
 			if (load_buffers[i].timer != INSTANCE_IS_READY)
@@ -90,10 +90,10 @@ void Execute()
 
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (store_buffers[i].timer != INSTANCE_IS_FREE)
+		if (store_buffers[i].timer != INSTANCE_NOT_RUNNING)
 		{
 			at_least_one_unit_is_not_free = true;
-			if ((*(store_buffers[i].src1_waiting) == '\0') && store_buffers[i].timer != INSTANCE_IS_READY && !store_buffers[i].just_got_a_broadcast)
+			if (store_buffers[i].timer != INSTANCE_IS_READY)
 			{
 				store_buffers[i].timer--;
 				if (store_buffers[i].timer == LAST_EX_CYCLE)

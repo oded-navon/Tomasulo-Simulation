@@ -1,5 +1,5 @@
 add_nr_units = 2
-mul_nr_units = 10
+mul_nr_units = 1
 div_nr_units = 1
 add_nr_reservation = 2
 mul_nr_reservation = 2

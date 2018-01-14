@@ -1,6 +1,5 @@
 #include "Utils.h"
 
-bool used_memory_port_in_current_cycle;
 config_args* _config_args_read;
 int _last_unoccupied_index_in_iq;
 inst* _instructions[MAX_INST_NUM];
