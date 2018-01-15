@@ -48,7 +48,7 @@ void Broadcast()
 	finished_broadcast = received_halt_in_fetch && finished_issue && finished_dispatch && finished_execute && finished_broadcast;
 	if(finished_broadcast)
 	{
-		return;
+		return;						  
 	}
 	//To finish broadcasting we check if all the calculation units and the mem unit is empty
 	//All these functions are to try and broadcast values if available
