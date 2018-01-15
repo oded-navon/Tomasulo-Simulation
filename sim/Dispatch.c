@@ -20,6 +20,9 @@ bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 bool check_if_at_least_one_station_is_occupied();
 void find_memory_instruction_to_dispatch();
+bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc);
+
+
 void Dispatch()
 {
 	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_station_is_occupied();
@@ -40,7 +43,11 @@ void find_memory_instruction_to_dispatch()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied) && (*(load_buffers[i].dst_waiting) == '\0'))
+		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING 
+			&& (load_buffers[i].occupied) 
+			&& (*(load_buffers[i].dst_waiting) == '\0')
+			&& no_rw_from_same_mem_address_with_older_pc(load_buffers[i].curr_inst->inst_log->pc)
+			)
 		{
 			load_buffers[i].timer = _config_args_read->mem_delay-1;
 			load_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
@@ -53,7 +60,10 @@ void find_memory_instruction_to_dispatch()
 		if ((store_buffers[i].timer == INSTANCE_NOT_RUNNING) 
 			&& (store_buffers[i].occupied) 
 			&& (*(store_buffers[i].src1_waiting) == '\0') 
-			&& !store_buffers[i].just_got_a_broadcast)
+			&& !store_buffers[i].just_got_a_broadcast
+			&& no_rw_from_same_mem_address_with_older_pc(store_buffers[i].curr_inst->inst_log->pc)
+
+			)
 		{
 			store_buffers[i].timer = _config_args_read->mem_delay-1;
 			store_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
@@ -66,6 +76,26 @@ void find_memory_instruction_to_dispatch()
 	{
 		store_buffers[f].just_got_a_broadcast = false;
 	}
+}
+
+bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc)
+{
+	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
+	{
+		if (load_buffers[i].occupied && load_buffers[i].curr_inst->inst_log->pc < buffer_pc)
+		{
+			return false;
+		}
+	}
+
+	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
+	{
+		if (store_buffers[i].occupied && store_buffers[i].curr_inst->inst_log->pc < buffer_pc)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 bool check_if_at_least_one_station_is_occupied()
