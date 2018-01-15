@@ -125,7 +125,7 @@ int check_available_load_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer == INSTANCE_IS_FREE && !load_buffers[i].just_broadcasted)
+		if (!load_buffers[i].occupied && !load_buffers[i].just_broadcasted)
 		{
 			return i;
 		}
@@ -137,7 +137,7 @@ int check_available_store_buffer()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (store_buffers[i].timer == INSTANCE_IS_FREE)
+		if (!store_buffers[i].occupied)
 		{
 			return i;
 		}
@@ -150,7 +150,6 @@ void update_load_buffer(int index, inst* inst)
 	load_buffers[index].dst = inst->dst;
 	load_buffers[index].imm = inst->imm;
 	load_buffers[index].occupied =true;
-	//load_buffers[index].timer = _config_args_read->mem_delay;
 	if (RAT[inst->dst].occupied)
 	{
 		snprintf(load_buffers[index].dst_waiting, NAME_LEN, "%s", RAT[inst->dst].rs_or_buff_name);
@@ -178,7 +177,6 @@ void update_store_buffer(int index, inst* inst)
 		store_buffers[index].src1 = _regs[inst->src1_index];
 	}
 	store_buffers[index].imm = inst->imm;
-	//store_buffers[index].timer = _config_args_read->mem_delay;
 	store_buffers[index].occupied = true;
 	store_buffers[index].curr_inst = inst;
 	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;

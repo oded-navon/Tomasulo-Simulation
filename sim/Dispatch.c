@@ -18,11 +18,11 @@ extern store_buffer store_buffers[MAX_CONFIG_SIZE];
 void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_unit_type unit_type);
 bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
-bool check_if_at_least_one_reservation_station_is_occupied();
+bool check_if_at_least_one_station_is_occupied();
 void find_memory_instruction_to_dispatch();
 void Dispatch()
 {
-	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_reservation_station_is_occupied();
+	finished_dispatch = received_halt_in_fetch && finished_issue && !check_if_at_least_one_station_is_occupied();
 	if (finished_dispatch)
 	{
 		return;
@@ -42,7 +42,7 @@ void find_memory_instruction_to_dispatch()
 	{
 		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied) && (*(load_buffers[i].dst_waiting) == '\0'))
 		{
-			load_buffers[i].timer = _config_args_read->mem_delay;
+			load_buffers[i].timer = _config_args_read->mem_delay-1;
 			load_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
 			break;
 		}
@@ -50,9 +50,12 @@ void find_memory_instruction_to_dispatch()
 
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if ((store_buffers[i].timer == INSTANCE_NOT_RUNNING) && (store_buffers[i].occupied) && (*(store_buffers[i].src1_waiting) == '\0') && !store_buffers[i].just_got_a_broadcast)
+		if ((store_buffers[i].timer == INSTANCE_NOT_RUNNING) 
+			&& (store_buffers[i].occupied) 
+			&& (*(store_buffers[i].src1_waiting) == '\0') 
+			&& !store_buffers[i].just_got_a_broadcast)
 		{
-			store_buffers[i].timer = _config_args_read->mem_delay;
+			store_buffers[i].timer = _config_args_read->mem_delay-1;
 			store_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
 			break;
 		}
@@ -65,7 +68,7 @@ void find_memory_instruction_to_dispatch()
 	}
 }
 
-bool check_if_at_least_one_reservation_station_is_occupied()
+bool check_if_at_least_one_station_is_occupied()
 {
 	for (int j = 0; j < _config_args_read->add_nr_reservation; j++)
 	{
@@ -86,6 +89,22 @@ bool check_if_at_least_one_reservation_station_is_occupied()
 	for (int j = 0; j < _config_args_read->div_nr_reservation; j++)
 	{
 		if (rs_div[j].occupied)
+		{
+			return true;
+		}
+	}
+
+	for (int j = 0; j < _config_args_read->mem_nr_store_buffers; j++)
+	{
+		if (store_buffers[j].occupied)
+		{
+			return true;
+		}
+	}
+
+	for (int j = 0; j < _config_args_read->mem_nr_load_buffers; j++)
+	{
+		if (load_buffers[j].occupied)
 		{
 			return true;
 		}
