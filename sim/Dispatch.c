@@ -40,7 +40,7 @@ void find_memory_instruction_to_dispatch()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied))
+		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied) && (*(load_buffers[i].dst_waiting) == '\0'))
 		{
 			load_buffers[i].timer = _config_args_read->mem_delay;
 			load_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
@@ -162,5 +162,7 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 
 bool is_rs_inst_ready(RS* res_station)
 {
-	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0') && (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched) && !res_station->just_got_a_broadcast;
+	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0')
+		&& (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched)
+		&& !res_station->just_got_a_broadcast && (*(res_station->dst_waiting) == '\0');
 }
