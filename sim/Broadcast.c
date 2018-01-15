@@ -48,8 +48,7 @@ void Broadcast()
 	finished_broadcast = received_halt_in_fetch && finished_issue && finished_dispatch && finished_execute && finished_broadcast;
 	if(finished_broadcast)
 	{
-		printf("the program finished it's run. thank you and go fuck yourself");
-		return;
+		return;						  
 	}
 	finished_broadcast = broadcast_specific_calc_type(_config_args_read->mul_nr_units, mul_units);
 	finished_broadcast = broadcast_specific_calc_type(_config_args_read->div_nr_units, div_units) && finished_broadcast;
