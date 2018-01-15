@@ -1,5 +1,10 @@
 #include "Utils.h"
 
+/*
+The way we built the program is having a Globals file, which all the other files are linked to, and this way
+we share all the variables in the program, instead of passing them between functions.
+*/
+
 config_args* _config_args_read;
 int _last_unoccupied_index_in_iq;
 inst* _instructions[MAX_INST_NUM];

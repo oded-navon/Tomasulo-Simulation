@@ -6,7 +6,7 @@ extern config_args* _config_args_read;
 extern inst* _instructions[MAX_INST_NUM];
 extern float _regs[NUM_OF_REGS];
 extern int _num_of_inst;
-
+extern inst_queue* _iq_arr;
 extern char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
 extern char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
 extern char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
@@ -38,6 +38,8 @@ void cleanup(cleanup_type clean_type)
 
 	case cleanup_config:
 		free(_config_args_read);
+		free(_iq_arr);
+
 	}
 }
 

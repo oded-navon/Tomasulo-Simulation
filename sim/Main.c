@@ -43,7 +43,7 @@ extern calc_unit add_units[MAX_CONFIG_SIZE]; //TODO: look into starvation
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
 
-//for finishing execution
+//We check these flags to know when we finished executing in all parts of the flow
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 extern bool finished_execute; //means to stop executing
@@ -52,16 +52,19 @@ extern bool finished_broadcast; //means to stop broadcasting
 
 int main(int argc, char* argv[])
 {
+	//Initializing our instruction queue
 	int return_value = SUCCESS;
 	_iq_arr = malloc(sizeof(inst_queue));
 	_iq_arr->num_items_in_queue = 0;
 	_iq_arr->queue_max_size = QUEUE_MAX_SIZE;
+	//Parsing the input args- memin and cfg
 	int ret_args = parse_args(argv);
 	if (ret_args == -1)
 	{
 		return FAIL;
 	}
 
+	//Initializing all our data structures for running the program
 	init_rs_names_arrays();
 	init_buff_names_arrays();
 	init_regs();
@@ -80,6 +83,7 @@ int main(int argc, char* argv[])
 		_cycles++;
 
 	}
+	//Now we write all the outputs
 	char* memory_out_path = argv[3];
 	char* reg_out_path = argv[4];
 	char* trace_inst_path = argv[5];
@@ -90,7 +94,6 @@ int main(int argc, char* argv[])
 	}
 
 	cleanup(cleanup_inst_and_config);
-	free(_iq_arr);
 	return return_value;
 }
 

@@ -7,9 +7,7 @@
 
 bool parse_config_file_line(char* line, config_args* output_config_args);
 bool insert_arg_to_struct(config_args* output_config_args, char* arg, int arg_val);
-bool parse_cdb_file_line(char* line, CDB_ex* output_cdb);
 bool parse_memin_file_line(char* line, int* memory_word);
-bool parse_inst_file_line(char* line, inst_ex* output_inst_arg);
 bool parse_file(char* file_path, parse_type parsing_type, void** output_object);
 int convert_mem_to_inst(int* memory_image, inst** output_insts);
 

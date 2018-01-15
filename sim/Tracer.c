@@ -13,6 +13,7 @@ bool write_memory_output(char* memout_file);
 bool write_reg_output(char* regout_file);
 bool write_inst_output(char * traceinst_file);
 
+//This exported function writes all of the outputs except cdb: memory, registers, instructions
 bool write_outputs(char * memout_file, char * regout_file, char * traceinst_file)
 {
 	if (!write_memory_output(memout_file))
@@ -124,6 +125,7 @@ bool write_inst_output(char * traceinst_file)
 	return return_value;
 }
 
+//This function is used in the Dispatch section, when we write an instruction's result to the CDB
 void write_cdb_trace_to_file(int cycle, int inst_pc, inst_opcodes unit_type, float data, char* tag)
 {
 	FILE* file = fopen(_trace_cdb_file_path, "a+");
