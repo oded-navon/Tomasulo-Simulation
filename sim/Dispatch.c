@@ -40,7 +40,7 @@ void find_memory_instruction_to_dispatch()
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].timer != INSTANCE_NOT_RUNNING && (load_buffers[i].occupied))
+		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied))
 		{
 			load_buffers[i].timer = _config_args_read->mem_delay;
 			break;
@@ -49,7 +49,7 @@ void find_memory_instruction_to_dispatch()
 
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if ((store_buffers[i].timer != INSTANCE_NOT_RUNNING) && (store_buffers[i].occupied) && (*(store_buffers[i].src1_waiting) == '\0') && !store_buffers[i].just_got_a_broadcast)
+		if ((store_buffers[i].timer == INSTANCE_NOT_RUNNING) && (store_buffers[i].occupied) && (*(store_buffers[i].src1_waiting) == '\0') && !store_buffers[i].just_got_a_broadcast)
 		{
 			store_buffers[i].timer = _config_args_read->mem_delay;
 			break;
