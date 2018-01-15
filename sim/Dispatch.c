@@ -20,7 +20,7 @@ bool is_rs_inst_ready(RS* res_station);
 void find_inst_to_dispatch(int num_of_calc_units, int num_of_rs_units, calc_unit* calc_unit_to_disp_to, RS* rs_unit_to_disp_from, calc_unit_type unit_type);
 bool check_if_at_least_one_station_is_occupied();
 void find_memory_instruction_to_dispatch();
-bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc);
+bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc, int buffer_index, int buffer_imm);
 
 
 void Dispatch()
@@ -45,8 +45,8 @@ void find_memory_instruction_to_dispatch()
 	{
 		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING 
 			&& (load_buffers[i].occupied) 
-			&& (*(load_buffers[i].dst_waiting) == '\0')
-			&& no_rw_from_same_mem_address_with_older_pc(load_buffers[i].curr_inst->inst_log->pc)
+			//&& (*(load_buffers[i].dst_waiting) == '\0')
+			&& no_rw_from_same_mem_address_with_older_pc(load_buffers[i].curr_inst->inst_log->pc, i, load_buffers[i].imm)
 			)
 		{
 			load_buffers[i].timer = _config_args_read->mem_delay-1;
@@ -61,7 +61,7 @@ void find_memory_instruction_to_dispatch()
 			&& (store_buffers[i].occupied) 
 			&& (*(store_buffers[i].src1_waiting) == '\0') 
 			&& !store_buffers[i].just_got_a_broadcast
-			&& no_rw_from_same_mem_address_with_older_pc(store_buffers[i].curr_inst->inst_log->pc)
+			&& no_rw_from_same_mem_address_with_older_pc(store_buffers[i].curr_inst->inst_log->pc, i, store_buffers[i].imm)
 
 			)
 		{
@@ -78,11 +78,11 @@ void find_memory_instruction_to_dispatch()
 	}
 }
 
-bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc)
+bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc, int buffer_index, int buffer_imm)
 {
 	for (int i = 0; i < _config_args_read->mem_nr_load_buffers; i++)
 	{
-		if (load_buffers[i].occupied && load_buffers[i].curr_inst->inst_log->pc < buffer_pc)
+		if ((i != buffer_index) && load_buffers[i].occupied && (buffer_imm == load_buffers[i].imm) && load_buffers[i].curr_inst->inst_log->pc < buffer_pc)
 		{
 			return false;
 		}
@@ -90,7 +90,7 @@ bool no_rw_from_same_mem_address_with_older_pc(int buffer_pc)
 
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		if (store_buffers[i].occupied && store_buffers[i].curr_inst->inst_log->pc < buffer_pc)
+		if ((i != buffer_index) && store_buffers[i].occupied && (buffer_imm == store_buffers[i].imm) && store_buffers[i].curr_inst->inst_log->pc < buffer_pc)
 		{
 			return false;
 		}
@@ -212,6 +212,6 @@ void dispatch_inst(calc_unit* unit_to_distpatch_to, RS* inst_to_dispatch, calc_u
 bool is_rs_inst_ready(RS* res_station)
 {
 	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0')
-		&& (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched)
-		&& !res_station->just_got_a_broadcast && (*(res_station->dst_waiting) == '\0');
+		&& (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched) && !res_station->just_got_a_broadcast;
+	//&& !res_station->just_got_a_broadcast && (*(res_station->dst_waiting) == '\0');
 }

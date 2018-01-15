@@ -1,5 +1,4 @@
 #include "Main.h"
-
 #include "ArgParser.h"
 #include "Fetch.h"
 #include "Dispatch.h"
@@ -43,7 +42,7 @@ extern calc_unit add_units[MAX_CONFIG_SIZE]; //TODO: look into starvation
 extern calc_unit div_units[MAX_CONFIG_SIZE];
 extern calc_unit mul_units[MAX_CONFIG_SIZE];
 
-//We check these flags to know when we finished executing in all parts of the flow
+//We check these flags to know when we finished executing the entire program
 extern bool received_halt_in_fetch; //means to stop do fetches
 extern bool finished_issue; //means to stop handle issues
 extern bool finished_execute; //means to stop executing
@@ -72,7 +71,8 @@ int main(int argc, char* argv[])
 	clear_all_buffers();
 	_cycles = 0;
 	
-	//order of operations is reversed to simulate concurrency of all of them
+	//order of operations is reversed to simulate concurrency of all of them. this is done with the help of several flags
+	//augmented to the data structures validating the simulation is correct
 	while (!(received_halt_in_fetch && finished_issue && finished_execute && finished_dispatch && finished_broadcast))
 	{ 
 		Broadcast();

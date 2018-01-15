@@ -28,7 +28,7 @@ char rs_add_names[MAX_CONFIG_SIZE][NAME_LEN];
 char rs_mul_names[MAX_CONFIG_SIZE][NAME_LEN];
 char rs_div_names[MAX_CONFIG_SIZE][NAME_LEN];
 
-calc_unit add_units[MAX_CONFIG_SIZE]; //TODO: look into starvation
+calc_unit add_units[MAX_CONFIG_SIZE]; 
 calc_unit div_units[MAX_CONFIG_SIZE];
 calc_unit mul_units[MAX_CONFIG_SIZE];
 

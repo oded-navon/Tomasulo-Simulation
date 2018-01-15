@@ -102,7 +102,7 @@ typedef struct {
 	float src1;	 //will contain value of _regs[src1]
 	char rs_waiting0[NAME_LEN];
 	char rs_waiting1[NAME_LEN];
-	char dst_waiting[NAME_LEN];
+	//char dst_waiting[NAME_LEN];
 	inst_opcodes action_type;
 	bool occupied;
 	bool already_dispatched;
@@ -164,7 +164,7 @@ typedef struct {
 	int dst;
 	int imm;
 	char buff_name[NAME_LEN];
-	char dst_waiting[NAME_LEN];
+	//char dst_waiting[NAME_LEN];
 	inst* curr_inst;
 	bool just_broadcasted;
 	bool occupied;

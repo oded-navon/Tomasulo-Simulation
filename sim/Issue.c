@@ -22,7 +22,7 @@ extern bool finished_issue; //means to stop handle issues
 
 
 bool issue_instruction();
-bool issue_memory_instruction(inst* inst);
+int issue_memory_instruction(inst* inst);
 int get_free_reservation_station_index(int opcode);
 int get_specific_free_reservation_station_index(RS rses[], int num_rses);
 int put_inst_in_RS(inst* instr);
@@ -95,7 +95,7 @@ bool issue_instruction()
 	return true;
 }
 
-bool issue_memory_instruction(inst* inst)
+int issue_memory_instruction(inst* inst)
 {
 	int index;
 	switch (inst->opcode)
@@ -150,10 +150,10 @@ void update_load_buffer(int index, inst* inst)
 	load_buffers[index].dst = inst->dst;
 	load_buffers[index].imm = inst->imm;
 	load_buffers[index].occupied =true;
-	if (RAT[inst->dst].occupied)
-	{
-		snprintf(load_buffers[index].dst_waiting, NAME_LEN, "%s", RAT[inst->dst].rs_or_buff_name);
-	}
+	//if (RAT[inst->dst].occupied)
+	//{
+	//	snprintf(load_buffers[index].dst_waiting, NAME_LEN, "%s", RAT[inst->dst].rs_or_buff_name);
+	//}
 
 	RAT[inst->dst].occupied = true;
 	memset(RAT[inst->dst].rs_or_buff_name, 0, NAME_LEN);
@@ -295,11 +295,11 @@ void put_inst_in_specific_rs(RS res_stations[], int free_station_index, inst* in
 		res_stations[free_station_index].src1 = _regs[instr->src1_index];
 	}
 
-	memset(res_stations[free_station_index].dst_waiting, 0, NAME_LEN);
-	if (RAT[instr->dst].occupied)
-	{
-		snprintf(res_stations[free_station_index].dst_waiting, NAME_LEN, "%s", RAT[instr->dst].rs_or_buff_name);
-	}
+	//memset(res_stations[free_station_index].dst_waiting, 0, NAME_LEN);
+	//if (RAT[instr->dst].occupied)
+	//{
+	//	snprintf(res_stations[free_station_index].dst_waiting, NAME_LEN, "%s", RAT[instr->dst].rs_or_buff_name);
+	//}
 
 
 	res_stations[free_station_index].curr_inst = instr;
