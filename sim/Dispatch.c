@@ -45,7 +45,6 @@ void find_memory_instruction_to_dispatch()
 	{
 		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING 
 			&& (load_buffers[i].occupied) 
-			//&& (*(load_buffers[i].dst_waiting) == '\0')
 			&& no_rw_from_same_mem_address_with_older_pc(load_buffers[i].curr_inst->inst_log->pc, i, load_buffers[i].imm)
 			)
 		{
@@ -213,5 +212,4 @@ bool is_rs_inst_ready(RS* res_station)
 {
 	return (res_station->occupied) && (*(res_station->rs_waiting0) == '\0')
 		&& (*(res_station->rs_waiting1) == '\0') && !(res_station->already_dispatched) && !res_station->just_got_a_broadcast;
-	//&& !res_station->just_got_a_broadcast && (*(res_station->dst_waiting) == '\0');
 }
