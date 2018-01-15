@@ -77,7 +77,7 @@ void init_buff_names_arrays()
 
 	for (int i = 0; i < _config_args_read->mem_nr_store_buffers; i++)
 	{
-		snprintf(store_buffers[i].buff_name, NAME_LEN, "STORE%d", i);
+		snprintf(store_buffers[i].buff_name, NAME_LEN, "ST%d", i);
 	}
 }
 

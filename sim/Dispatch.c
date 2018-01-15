@@ -43,6 +43,7 @@ void find_memory_instruction_to_dispatch()
 		if (load_buffers[i].timer == INSTANCE_NOT_RUNNING && (load_buffers[i].occupied))
 		{
 			load_buffers[i].timer = _config_args_read->mem_delay;
+			load_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
 			break;
 		}
 	}
@@ -52,6 +53,7 @@ void find_memory_instruction_to_dispatch()
 		if ((store_buffers[i].timer == INSTANCE_NOT_RUNNING) && (store_buffers[i].occupied) && (*(store_buffers[i].src1_waiting) == '\0') && !store_buffers[i].just_got_a_broadcast)
 		{
 			store_buffers[i].timer = _config_args_read->mem_delay;
+			store_buffers[i].curr_inst->inst_log->cycle_ex_start = _cycles;
 			break;
 		}
 	}

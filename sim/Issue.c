@@ -177,7 +177,7 @@ void update_store_buffer(int index, inst* inst)
 	store_buffers[index].curr_inst = inst;
 	store_buffers[index].curr_inst->inst_log->cycle_issued = _cycles;
 	store_buffers[index].curr_inst->inst_log->write_cdb = IRRELEVANT;
-	snprintf(store_buffers[index].curr_inst->inst_log->tag, NAME_LEN, "%s", load_buffers[index].buff_name);
+	snprintf(store_buffers[index].curr_inst->inst_log->tag, NAME_LEN, "%s", store_buffers[index].buff_name);
 
 }
 
@@ -311,7 +311,6 @@ void enable_just_dispatched_specific_rses(RS rses[], int num_rses)
 		rses[i].just_broadcasted = false;
 	}
 }
-
 
 void enable_just_load_buffers_that_finished_broadcast()
 {
